@@ -9,6 +9,7 @@
 </head>
 <body>
 
+<!-- INTRO -->
 <div class="intro-overlay" id="intro">
   <div class="intro-img-wrap" id="introWrap"></div>
   <div class="intro-dots" id="introDots"></div>
@@ -16,6 +17,7 @@
   <div class="intro-skip" onclick="closeIntro()">ຂ້າມ / ປິດ</div>
 </div>
 
+<!-- NAV -->
 <nav class="nav">
   <div>
     <div class="nav-logo">Bai Boua</div>
@@ -28,11 +30,12 @@
   </div>
 </nav>
 
+<!-- HOME -->
 <div class="screen active" id="screen-home">
   <div class="hero">
     <div class="hero-tag">✦ Italian Charm Collection ✦</div>
-    <h1 class="hero-title">ຈັດສາຍ<em>ແຂນ</em><br>ໃນແບບຂອງທ່ານ</h1>
-    <p class="hero-sub">ເລືອກຊາມ · ຈັດຮູບແບບ · ສ້າງຄວາມໄປສະເພາະຕົວ</p>
+    <h1 class="hero-title">ເລືອກ<em>ຊາມ</em>ທີ່ຮັກ<br>ສ້າງສາຍແຂນໃນຝັນ</h1>
+    <p class="hero-sub">ເລືອກຊາມ · ຈັດຮູບແບບ · ສ່ົງໃຫ້ຮ້ານ</p>
     <button class="hero-btn" onclick="goScreen('designer')">ເລີ່ມຈັດສາຍແຂນ →</button>
   </div>
   <div class="features">
@@ -47,21 +50,28 @@
   </div>
 </div>
 
+<!-- DESIGNER -->
 <div class="screen" id="screen-designer">
   <div class="designer">
+
+    <!-- Canvas -->
     <div class="canvas-wrap" id="canvas">
       <div class="canvas-hint" id="hint">← ກົດຊາມດ້ານລຸ່ມເພື່ອເພີ່ມ →</div>
+
+      <!-- Layer panel top-left -->
       <div class="layer-panel">
         <div class="layer-head">⊞ Layers</div>
         <div id="layerList"><div class="layer-empty">ຍັງບໍ່ມີ</div></div>
       </div>
+
+      <!-- Joystick top-right -->
       <div class="joystick" id="joystick">
-        <div class="joy-head">ຍ້າຍຊາມ</div>
+        <div class="joy-head">ຍ້າຍ / ຂະໜາດ</div>
         <div class="joy-grid">
           <div></div><button class="jbtn" onclick="moveCharm(0,-6)">↑</button><div></div>
-          <button class="jbtn" onclick="moveCharm(-6,0)">←</button>
+          <button class="jbtn" onclick="moveCharm(-1,0)">←</button>
           <button class="jbtn center" onclick="centerCharm()">◉</button>
-          <button class="jbtn" onclick="moveCharm(6,0)">→</button>
+          <button class="jbtn" onclick="moveCharm(1,0)">→</button>
           <div></div><button class="jbtn" onclick="moveCharm(0,6)">↓</button><div></div>
         </div>
         <div class="size-row">
@@ -69,24 +79,33 @@
           <button class="szBtn" onclick="resizeCharm(-6)">− ນ້ອຍ</button>
         </div>
       </div>
+
+      <!-- Bracelet -->
       <div class="bracelet-rail" id="bracelet"></div>
     </div>
+
+    <!-- Summary bar -->
     <div class="sumbar">
       <div><div class="sum-label">ຊາມ</div><div class="sum-count" id="sumCount">0 ຊິ້ນ</div></div>
       <div style="text-align:center"><div class="sum-label">ລາຄາລວມ</div><div class="sum-price" id="sumPrice">0 ກີບ</div></div>
       <button class="save-btn" id="saveBtn" onclick="goScreen('summary')" disabled>ສຳເລັດ 💾</button>
     </div>
+
+    <!-- Charm picker -->
     <div class="picker">
       <div class="picker-cats" id="pickerCats"></div>
-      <div class="charm-scroll" id="charmScroll"></div>
+      <div class="charm-grid-wrap" id="charmGridWrap"></div>
     </div>
+
   </div>
 </div>
 
+<!-- SUMMARY -->
 <div class="screen" id="screen-summary">
   <div class="sumpage">
     <div class="sumpage-title">ສຳເລັດແລ້ວ ✦</div>
-    <div class="sumpage-sub">ກວດສອບຊາມຂອງທ່ານກ່ອນສົ່ງ</div>
+    <div class="sumpage-sub">ກວດສອບຊາມຂອງທ່ານ ແລ້ວສົ່ງໃຫ້ຮ້ານ</div>
+
     <div class="order-card">
       <div class="order-preview" id="orderPreview"></div>
       <div id="orderList"></div>
@@ -95,9 +114,32 @@
         <div class="ot-price" id="orderTotal">0 ກີບ</div>
       </div>
     </div>
+
+    <!-- Contact card -->
+    <div class="contact-card">
+      <div class="contact-title">ຕິດຕໍ່ຮ້ານ</div>
+      <div class="contact-row">
+        <span class="contact-icon">📱</span>
+        <div>
+          <div class="contact-label">WhatsApp / ໂທ</div>
+          <div class="contact-val">+856 20 99809749</div>
+        </div>
+      </div>
+      <div class="contact-row">
+        <span class="contact-icon">📸</span>
+        <div>
+          <div class="contact-label">Instagram</div>
+          <div class="contact-val">@maliluv_bb</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="act-btns" style="margin-bottom:10px">
+      <button class="act-btn wa" onclick="sendWhatsApp()">💬 WhatsApp ສົ່ງຄຳສັ່ງ</button>
+    </div>
     <div class="act-btns">
-      <button class="act-btn sec" onclick="saveImg()">📷 ບັນທຶກຮູບ</button>
-      <button class="act-btn pri" onclick="sendOrder()">📤 ສົ່ງໃຫ້ຮ້ານ</button>
+      <button class="act-btn ig" onclick="openIG()">📸 Instagram</button>
+      <button class="act-btn sec" onclick="saveImg()">📷 Screenshot</button>
     </div>
   </div>
 </div>

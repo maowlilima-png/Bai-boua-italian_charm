@@ -98,7 +98,7 @@ let selectedCharms = [], selectedLayer = null;
 let activeCat = CHARM_DATA[0]?.cat || '';
 let charmPos = {}, charmUID = 0;
 
-// ===== PICKER =====
+// ===== PICKER — categories (horizontal scroll) =====
 function renderPickerCats() {
   const el = document.getElementById('pickerCats');
   el.innerHTML = '';
@@ -116,11 +116,15 @@ function renderPickerCats() {
   });
 }
 
+// ===== PICKER — charms (vertical grid scroll) =====
 function renderCharmGrid() {
-  const el = document.getElementById('charmScroll');
-  el.innerHTML = '';
+  const wrap = document.getElementById('charmGridWrap');
+  wrap.innerHTML = '';
+  const inner = document.createElement('div');
+  inner.className = 'charm-grid-inner';
   const catObj = CHARM_DATA.find(c => c.cat === activeCat);
-  if (!catObj) return;
+  if (!catObj) { wrap.appendChild(inner); return; }
+
   catObj.subs.forEach(sub => {
     sub.imgs.forEach(imgSrc => {
       const item = document.createElement('div');
@@ -129,9 +133,11 @@ function renderCharmGrid() {
         <div class="charm-iname">${catObj.cat}</div>
         <div class="charm-iprice">${(sub.price / 1000).toFixed(0)}K</div>`;
       item.onclick = () => addCharm(catObj.cat, sub.price, imgSrc);
-      el.appendChild(item);
+      inner.appendChild(item);
     });
   });
+  wrap.appendChild(inner);
+  wrap.scrollTop = 0;
 }
 
 // ===== BRACELET LOGIC =====
@@ -156,7 +162,8 @@ function renderBracelet() {
     div.className = 'charm-on-rail' + (c.uid === selectedLayer ? ' selected' : '');
     div.style.width = pos.size + 'px';
     div.style.height = pos.size + 'px';
-    div.style.transform = `translate(${pos.x}px,${pos.y}px)`;
+    // Only apply Y offset (vertical nudge) — X is handled by bracelet row order
+    div.style.marginTop = pos.y + 'px';
     const img = document.createElement('img');
     img.src = c.imgSrc;
     img.style.width = (pos.size - 8) + 'px';
@@ -186,7 +193,7 @@ function renderLayers() {
     const div = document.createElement('div');
     div.className = 'layer-item' + (c.uid === selectedLayer ? ' sel' : '');
     div.innerHTML = `<span class="layer-num">${i + 1}</span>
-      <img src="${c.imgSrc}" style="width:18px;height:18px;object-fit:cover;border-radius:3px">
+      <img src="${c.imgSrc}" style="width:18px;height:18px;object-fit:cover;border-radius:3px;flex-shrink:0">
       <span style="font-size:9px;max-width:36px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.name}</span>
       <button class="layer-del" onclick="event.stopPropagation();removeCharm('${c.uid}')">✕</button>`;
     div.onclick = () => {
@@ -210,23 +217,33 @@ function removeCharm(uid) {
   }
 }
 
+// Joystick: Y-axis nudge only (X order is bracelet sequence)
 function moveCharm(dx, dy) {
   if (!selectedLayer || !charmPos[selectedLayer]) return;
-  charmPos[selectedLayer].x += dx;
   charmPos[selectedLayer].y += dy;
+  // Reorder in array for left/right
+  if (dx !== 0) {
+    const idx = selectedCharms.findIndex(c => c.uid === selectedLayer);
+    const newIdx = idx + (dx > 0 ? 1 : -1);
+    if (newIdx >= 0 && newIdx < selectedCharms.length) {
+      const tmp = selectedCharms[idx];
+      selectedCharms[idx] = selectedCharms[newIdx];
+      selectedCharms[newIdx] = tmp;
+    }
+  }
   renderBracelet();
 }
 
 function centerCharm() {
   if (!selectedLayer || !charmPos[selectedLayer]) return;
-  charmPos[selectedLayer].x = 0; charmPos[selectedLayer].y = 0;
+  charmPos[selectedLayer].y = 0;
   renderBracelet();
 }
 
 function resizeCharm(d) {
   if (!selectedLayer || !charmPos[selectedLayer]) return;
   const p = charmPos[selectedLayer];
-  p.size = Math.max(24, Math.min(70, p.size + d));
+  p.size = Math.max(28, Math.min(70, p.size + d));
   renderBracelet();
 }
 
@@ -239,11 +256,15 @@ function updateSumbar() {
 }
 
 // ===== SUMMARY =====
+const WA_NUMBER = '85620 99809749';
+const IG_URL = 'https://www.instagram.com/maliluv_bb';
+
 function buildSummary() {
   const prev = document.getElementById('orderPreview');
   const list = document.getElementById('orderList');
   const totalEl = document.getElementById('orderTotal');
   prev.innerHTML = ''; list.innerHTML = '';
+
   if (!selectedCharms.length) {
     prev.innerHTML = '<div style="font-size:12px;color:#878679;padding:8px">ຍັງບໍ່ໄດ້ເລືອກຊາມ</div>';
     totalEl.textContent = '0 ກີບ'; return;
@@ -265,7 +286,10 @@ function buildSummary() {
     list.innerHTML += `<div class="order-item">
       <div class="oi-left">
         <img class="oi-img" src="${item.imgSrc}">
-        <div><div class="oi-name">${item.name}</div><div class="oi-qty">x${item.qty} · ${(item.price / 1000).toFixed(0)}K/ຊິ້ນ</div></div>
+        <div>
+          <div class="oi-name">${item.name}</div>
+          <div class="oi-qty">x${item.qty} · ${(item.price / 1000).toFixed(0)}K/ຊິ້ນ</div>
+        </div>
       </div>
       <div class="oi-price">${(item.price * item.qty).toLocaleString()} ກີບ</div>
     </div>`;
@@ -273,14 +297,34 @@ function buildSummary() {
   totalEl.textContent = total.toLocaleString() + ' ກີບ';
 }
 
-function saveImg() {
-  alert('📷 ກະລຸນາ screenshot ໜ້ານີ້ ແລ້ວສົ່ງໃຫ້ຮ້ານ!');
+function getOrderText() {
+  const counts = {};
+  selectedCharms.forEach(c => {
+    if (!counts[c.name + c.price]) counts[c.name + c.price] = { ...c, qty: 0 };
+    counts[c.name + c.price].qty++;
+  });
+  const total = selectedCharms.reduce((s, c) => s + c.price, 0);
+  let msg = '🪬 ສັ່ງຊາຍແຂນ Bai Boua\n\n';
+  Object.values(counts).forEach(item => {
+    msg += `• ${item.name} x${item.qty} = ${(item.price * item.qty).toLocaleString()} ກີບ\n`;
+  });
+  msg += `\n💰 ລາຄາລວມ: ${total.toLocaleString()} ກີບ`;
+  return msg;
 }
 
-function sendOrder() {
+function sendWhatsApp() {
   if (!selectedCharms.length) { alert('ກະລຸນາເລືອກຊາມກ່ອນ!'); return; }
-  const total = selectedCharms.reduce((s, c) => s + c.price, 0);
-  alert('✅ ສຳເລັດ!\n\nລາຄາ: ' + total.toLocaleString() + ' ກີບ\n\nສົ່ງ screenshot ໜ້ານີ້ ຫຼື WhatsApp ໃຫ້ທາງຮ້ານ 📲');
+  const msg = encodeURIComponent(getOrderText());
+  const num = WA_NUMBER.replace(/\s/g, '');
+  window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
+}
+
+function openIG() {
+  window.open(IG_URL, '_blank');
+}
+
+function saveImg() {
+  alert('📷 ກະລຸນາ screenshot ໜ້ານີ້ ແລ້ວສົ່ງໃຫ້ຮ້ານ!');
 }
 
 // ===== INIT =====
