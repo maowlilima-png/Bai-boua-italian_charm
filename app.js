@@ -144,7 +144,7 @@ function renderCharmGrid() {
 function addCharm(name, price, imgSrc) {
   const uid = 'c' + (++charmUID);
   selectedCharms.push({ uid, name, price, imgSrc });
-  charmPos[uid] = { x: 0, y: 0, size: 40 };
+  charmPos[uid] = { x: 0, y: 0, size: 56 };
   selectedLayer = uid;
   renderBracelet();
   renderLayers();
