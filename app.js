@@ -134,13 +134,15 @@ function getCV() { return document.getElementById('freeCanvas'); }
 function getDPR() { return window.devicePixelRatio || 1; }
 
 // Logical size (CSS pixels) — all coordinates use these
-function cvW() { return getCV().offsetWidth; }
-function cvH() { return getCV().offsetHeight; }
+function cvW() { return getCV().offsetWidth || getCV().parentElement.offsetWidth; }
+function cvH() { return getCV().offsetHeight || (getCV().parentElement.offsetHeight - 44); }
 
 function setupCanvas() {
   const c = getCV(), dpr = getDPR();
-  c.width  = Math.round(cvW() * dpr);
-  c.height = Math.round(cvH() * dpr);
+  // canvas CSS size is set by CSS (top:44px, height:calc(100%-44px))
+  // just sync physical pixels
+  c.width  = Math.round(c.offsetWidth * dpr);
+  c.height = Math.round(c.offsetHeight * dpr);
 }
 
 function draw() {
@@ -435,17 +437,22 @@ function dlImg() {
 
 
 // ===== PANEL TOGGLES =====
-let ctrlOpen = true, layerOpen = true;
-function toggleCtrl() {
-  ctrlOpen = !ctrlOpen;
-  document.getElementById('ctrlBody').style.display = ctrlOpen ? '' : 'none';
-  document.getElementById('ctrlToggleIcon').textContent = ctrlOpen ? '▲' : '▼';
-}
+let layerOpen = false;
+function toggleCtrl() {} // no-op, toolbar always visible
 function toggleLayer() {
   layerOpen = !layerOpen;
-  document.getElementById('layerBody').style.display = layerOpen ? '' : 'none';
+  const body = document.getElementById('layerBody');
+  body.style.display = layerOpen ? 'block' : 'none';
   document.getElementById('layerToggleIcon').textContent = layerOpen ? '▲' : '▼';
 }
+// Close layer dropdown when tapping canvas
+document.addEventListener('click', e => {
+  if (layerOpen && !e.target.closest('.tb-layer-wrap')) {
+    layerOpen = false;
+    document.getElementById('layerBody').style.display = 'none';
+    document.getElementById('layerToggleIcon').textContent = '▼';
+  }
+}, true);
 
 // ===== INIT =====
 buildIntro();

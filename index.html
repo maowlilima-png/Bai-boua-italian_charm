@@ -67,26 +67,28 @@
       </div>
       <!-- Free-floating charms canvas overlaid -->
       <canvas id="freeCanvas"></canvas>
-      <!-- Controls - tap header to collapse -->
-      <div class="ctrl-panel" id="ctrlPanel">
-        <div class="panel-header" onclick="toggleCtrl()">✥ <span id="ctrlToggleIcon">▲</span></div>
-        <div id="ctrlBody">
-          <div class="ctrl-dpad">
-            <div></div><button class="cb" onclick="mCharm(0,-1)">↑</button><div></div>
-            <button class="cb" onclick="mCharm(-1,0)">←</button>
-            <button class="cb cc" onclick="cCenter()">◉</button>
-            <button class="cb" onclick="mCharm(1,0)">→</button>
-            <div></div><button class="cb" onclick="mCharm(0,1)">↓</button><div></div>
+      <!-- Toolbar: horizontal strip at top, no overlap -->
+      <div class="toolbar-strip">
+        <!-- Layer toggle left -->
+        <div class="tb-layer-wrap">
+          <button class="tb-btn tb-layer-btn" onclick="toggleLayer()">⊞ <span id="layerToggleIcon">▼</span></button>
+          <div class="layer-dropdown" id="layerBody" style="display:none">
+            <div id="layerList"><div class="lp-empty">ຍັງບໍ່ມີ</div></div>
           </div>
-          <div class="ctrl-row"><button class="csz" onclick="rSize(10)">＋</button><button class="csz" onclick="rSize(-10)">－</button></div>
-          <div class="ctrl-row" style="margin-top:3px"><button class="csz" onclick="lFwd()">▲</button><button class="csz" onclick="lBack()">▼</button></div>
         </div>
-      </div>
-      <!-- Layer list - tap header to collapse -->
-      <div class="layer-panel" id="layerPanel">
-        <div class="panel-header" onclick="toggleLayer()">⊞ <span id="layerToggleIcon">▲</span></div>
-        <div id="layerBody">
-          <div id="layerList"><div class="lp-empty">ຍັງບໍ່ມີ</div></div>
+        <!-- Controls inline -->
+        <div class="tb-controls">
+          <button class="tb-btn" onclick="mCharm(-1,0)">←</button>
+          <button class="tb-btn" onclick="mCharm(0,-1)">↑</button>
+          <button class="tb-btn cc2" onclick="cCenter()">◉</button>
+          <button class="tb-btn" onclick="mCharm(0,1)">↓</button>
+          <button class="tb-btn" onclick="mCharm(1,0)">→</button>
+          <div class="tb-divider"></div>
+          <button class="tb-btn" onclick="rSize(10)">＋</button>
+          <button class="tb-btn" onclick="rSize(-10)">－</button>
+          <div class="tb-divider"></div>
+          <button class="tb-btn" onclick="lFwd()">▲</button>
+          <button class="tb-btn" onclick="lBack()">▼</button>
         </div>
       </div>
     </div>
