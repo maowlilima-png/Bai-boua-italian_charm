@@ -67,29 +67,27 @@
       </div>
       <!-- Free-floating charms canvas overlaid -->
       <canvas id="freeCanvas"></canvas>
-      <!-- Controls -->
+      <!-- Controls - tap header to collapse -->
       <div class="ctrl-panel" id="ctrlPanel">
-        <div class="ctrl-title">ຍ້າຍ / ຂະໜາດ</div>
-        <div class="ctrl-dpad">
-          <div></div><button class="cb" onclick="mCharm(0,-1)">↑</button><div></div>
-          <button class="cb" onclick="mCharm(-1,0)">←</button>
-          <button class="cb cc" onclick="cCenter()">◉</button>
-          <button class="cb" onclick="mCharm(1,0)">→</button>
-          <div></div><button class="cb" onclick="mCharm(0,1)">↓</button><div></div>
-        </div>
-        <div class="ctrl-row">
-          <button class="csz" onclick="rSize(10)">＋</button>
-          <button class="csz" onclick="rSize(-10)">－</button>
-        </div>
-        <div class="ctrl-row" style="margin-top:3px">
-          <button class="csz" onclick="lFwd()">▲ ຂຶ້ນ</button>
-          <button class="csz" onclick="lBack()">▼ ລົງ</button>
+        <div class="panel-header" onclick="toggleCtrl()">✥ <span id="ctrlToggleIcon">▲</span></div>
+        <div id="ctrlBody">
+          <div class="ctrl-dpad">
+            <div></div><button class="cb" onclick="mCharm(0,-1)">↑</button><div></div>
+            <button class="cb" onclick="mCharm(-1,0)">←</button>
+            <button class="cb cc" onclick="cCenter()">◉</button>
+            <button class="cb" onclick="mCharm(1,0)">→</button>
+            <div></div><button class="cb" onclick="mCharm(0,1)">↓</button><div></div>
+          </div>
+          <div class="ctrl-row"><button class="csz" onclick="rSize(10)">＋</button><button class="csz" onclick="rSize(-10)">－</button></div>
+          <div class="ctrl-row" style="margin-top:3px"><button class="csz" onclick="lFwd()">▲</button><button class="csz" onclick="lBack()">▼</button></div>
         </div>
       </div>
-      <!-- Layer list -->
-      <div class="layer-panel">
-        <div class="lp-head">⊞ Layers</div>
-        <div id="layerList"><div class="lp-empty">ຍັງບໍ່ມີ</div></div>
+      <!-- Layer list - tap header to collapse -->
+      <div class="layer-panel" id="layerPanel">
+        <div class="panel-header" onclick="toggleLayer()">⊞ <span id="layerToggleIcon">▲</span></div>
+        <div id="layerBody">
+          <div id="layerList"><div class="lp-empty">ຍັງບໍ່ມີ</div></div>
+        </div>
       </div>
     </div>
 
@@ -112,20 +110,29 @@
 <div class="screen" id="screen-summary">
   <div class="sumpage">
     <div class="sumpage-title">ສຳເລັດແລ້ວ ✦</div>
-    <div class="sumpage-sub">ກວດສອບ ແລ້ວສົ່ງໃຫ້ຮ້ານ</div>
+    <div class="sumpage-sub">ກວດສອບຊາມ ແລ້ວສົ່ງໃຫ້ຮ້ານ</div>
+
+    <!-- Design preview -->
+    <div class="preview-card">
+      <canvas id="previewCanvas" style="width:100%;border-radius:10px;background:linear-gradient(135deg,#faf8f4,#ede8de)"></canvas>
+    </div>
+
+    <!-- Order details -->
     <div class="order-card">
-      <canvas id="previewCanvas" style="width:100%;border-radius:10px;background:#f5f0e8"></canvas>
       <div id="orderList"></div>
       <div class="order-total">
         <div><div class="ot-lbl">ລາຄາທັງໝົດ</div></div>
         <div class="ot-price" id="orderTotal">0 ກີບ</div>
       </div>
     </div>
+
+    <!-- Contact -->
     <div class="contact-card">
       <div class="cc-title">ຕິດຕໍ່ຮ້ານ</div>
       <div class="cc-row"><span>📱</span><div><div class="cc-lbl">WhatsApp / ໂທ</div><div class="cc-val">+856 20 99809749</div></div></div>
       <div class="cc-row"><span>📸</span><div><div class="cc-lbl">Instagram</div><div class="cc-val">@maliluv_bb</div></div></div>
     </div>
+
     <div class="act-btns" style="margin-bottom:10px">
       <button class="act-btn wa" onclick="sendWA()">💬 WhatsApp ສົ່ງຄຳສັ່ງ</button>
     </div>

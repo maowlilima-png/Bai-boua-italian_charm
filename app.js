@@ -366,26 +366,40 @@ function buildSummary() {
   const tot  = document.getElementById('orderTotal');
   list.innerHTML = '';
 
-  // Copy canvas to preview
+  // Draw canvas design into preview
   const src = getCV();
   const prev = document.getElementById('previewCanvas');
-  prev.width = src.offsetWidth; prev.height = src.offsetHeight;
+  // Copy from the live canvas (already rendered correctly with DPR)
+  const pw = src.offsetWidth, ph = src.offsetHeight;
+  prev.width = Math.round(pw * getDPR());
+  prev.height = Math.round(ph * getDPR());
   prev.style.width = '100%';
-  prev.getContext('2d').drawImage(src, 0, 0, src.width, src.height, 0, 0, prev.width, prev.height);
+  prev.style.height = 'auto';
+  prev.style.borderRadius = '10px';
+  const pctx = prev.getContext('2d');
+  // Just copy pixels from the live canvas
+  pctx.drawImage(src, 0, 0);
 
   if (!charms.length) { tot.textContent = '0 ກີບ'; return; }
+
+  // Count by unique image src
   const counts = {};
   charms.forEach(c => {
-    if (!counts[c.src]) counts[c.src] = { ...c, qty: 0 };
-    counts[c.src].qty++;
+    const k = c.src + '|' + c.price;
+    if (!counts[k]) counts[k] = { ...c, qty: 0 };
+    counts[k].qty++;
   });
   let total = 0;
   Object.values(counts).forEach(it => {
     total += it.price * it.qty;
     list.innerHTML += `<div class="order-item">
-      <div class="oi-left"><img class="oi-img" src="${it.src}">
-        <div><div class="oi-name">${it.name}</div>
-        <div class="oi-qty">x${it.qty} · ${(it.price/1000).toFixed(0)}K/ຊິ້ນ</div></div></div>
+      <div class="oi-left">
+        <img class="oi-img" src="${it.src}">
+        <div class="oi-info">
+          <div class="oi-name">${it.name}</div>
+          <div class="oi-qty">x${it.qty} · ${(it.price/1000).toFixed(0)}K/ຊິ້ນ</div>
+        </div>
+      </div>
       <div class="oi-price">${(it.price*it.qty).toLocaleString()} ກີບ</div>
     </div>`;
   });
@@ -407,6 +421,20 @@ function openIG() { window.open(IG, '_blank'); }
 function dlImg() {
   const c = getCV(), a = document.createElement('a');
   a.href = c.toDataURL('image/png'); a.download = 'bai_boua_design.png'; a.click();
+}
+
+
+// ===== PANEL TOGGLES =====
+let ctrlOpen = true, layerOpen = true;
+function toggleCtrl() {
+  ctrlOpen = !ctrlOpen;
+  document.getElementById('ctrlBody').style.display = ctrlOpen ? '' : 'none';
+  document.getElementById('ctrlToggleIcon').textContent = ctrlOpen ? '▲' : '▼';
+}
+function toggleLayer() {
+  layerOpen = !layerOpen;
+  document.getElementById('layerBody').style.display = layerOpen ? '' : 'none';
+  document.getElementById('layerToggleIcon').textContent = layerOpen ? '▲' : '▼';
 }
 
 // ===== INIT =====

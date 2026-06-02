@@ -87,8 +87,8 @@ button{font-family:'Jost',sans-serif;cursor:pointer;border:none;background:none;
 
 /* CONTROLS */
 .ctrl-panel{
-  position:absolute;right:8px;bottom:8px;top:auto;
-  background:rgba(255,255,255,0.96);border:1px solid var(--almond);
+  position:absolute;right:8px;top:8px;
+  background:rgba(255,255,255,0.88);border:1px solid var(--almond);
   border-radius:12px;padding:8px;box-shadow:0 4px 14px rgba(64,38,21,0.12);
   z-index:10;
 }
@@ -103,9 +103,9 @@ button{font-family:'Jost',sans-serif;cursor:pointer;border:none;background:none;
 
 /* LAYER PANEL */
 .layer-panel{
-  position:absolute;left:8px;bottom:8px;top:auto;
-  background:rgba(255,255,255,0.96);border:1px solid var(--almond);
-  border-radius:10px;padding:6px;min-width:90px;max-height:170px;overflow-y:auto;
+  position:absolute;left:8px;top:8px;
+  background:rgba(255,255,255,0.88);border:1px solid var(--almond);
+  border-radius:10px;padding:5px;min-width:86px;max-height:140px;overflow-y:auto;
   box-shadow:0 4px 12px rgba(64,38,21,0.1);z-index:10;
 }
 .lp-head{font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--mtn);margin-bottom:5px;text-align:center}
@@ -143,12 +143,7 @@ button{font-family:'Jost',sans-serif;cursor:pointer;border:none;background:none;
 .sumpage-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:400;font-style:italic;color:var(--coffee);margin-bottom:4px}
 .sumpage-sub{font-size:11px;color:var(--mtn);margin-bottom:16px}
 .order-card{background:#fff;border-radius:14px;padding:14px;border:1px solid var(--almond);margin-bottom:14px}
-.order-item{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--cream);font-size:12px}
-.order-item:last-child{border-bottom:none}
-.oi-left{display:flex;align-items:center;gap:8px}
-.oi-img{width:32px;height:32px;border-radius:5px;object-fit:contain;background:var(--cream)}
-.oi-name{color:var(--coffee)}.oi-qty{font-size:10px;color:var(--mtn)}
-.oi-price{color:var(--berk);font-weight:500}
+
 .order-total{background:var(--coffee);border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
 .ot-lbl{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--mtn)}
 .ot-price{font-family:'Cormorant Garamond',serif;font-size:26px;color:var(--gold)}
@@ -167,3 +162,29 @@ button{font-family:'Jost',sans-serif;cursor:pointer;border:none;background:none;
 /* RIPPLE */
 @keyframes ripple{0%{transform:translate(-50%,-50%) scale(0.5);opacity:0.8}100%{transform:translate(-50%,-50%) scale(2.5);opacity:0}}
 .ripple{position:fixed;width:20px;height:20px;border-radius:50%;background:rgba(200,169,110,0.5);pointer-events:none;animation:ripple 0.4s ease-out forwards;z-index:9999}
+
+/* PREVIEW CARD */
+.preview-card{
+  background:#fff;border-radius:14px;padding:12px;
+  border:1px solid var(--almond);margin-bottom:12px;
+  box-shadow:0 2px 10px rgba(64,38,21,0.06);
+}
+
+/* ORDER ITEM with image */
+.order-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--cream);font-size:12px}
+.order-item:last-child{border-bottom:none}
+.oi-left{display:flex;align-items:center;gap:10px}
+.oi-img{width:44px;height:44px;border-radius:8px;object-fit:contain;background:var(--cream);border:1px solid var(--almond)}
+.oi-info{}
+.oi-name{color:var(--coffee);font-weight:500;font-size:13px}
+.oi-qty{font-size:11px;color:var(--mtn);margin-top:2px}
+.oi-price{color:var(--berk);font-weight:600;font-size:13px;white-space:nowrap}
+
+/* Collapsible panel header */
+.panel-header {
+  font-size:10px;letter-spacing:0.1em;color:var(--mtn);
+  cursor:pointer;user-select:none;padding:2px 4px;
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:4px;
+}
+.panel-header:hover{color:var(--coffee);}
