@@ -33,6 +33,11 @@ function closeIntro() { document.getElementById('intro').style.display = 'none';
 
 // ===== NAV =====
 function goScreen(id) {
+  // Snapshot canvas BEFORE switching away from designer
+  if (id === 'summary') {
+    const c = getCV();
+    canvasSnapshot = c.toDataURL('image/png');
+  }
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
@@ -190,6 +195,7 @@ function draw() {
 
 // ===== TOUCH + MOUSE =====
 let charms = [], selId = null, activeCat = CHARM_DATA[0]?.cat || '', uidN = 0;
+let canvasSnapshot = null; // stored dataURL for summary
 let drag = null, dox = 0, doy = 0;
 let pinching = false, pinchD0 = 0, pinchS0 = 0;
 
@@ -366,19 +372,22 @@ function buildSummary() {
   const tot  = document.getElementById('orderTotal');
   list.innerHTML = '';
 
-  // Draw canvas design into preview
-  const src = getCV();
+  // Show snapshot taken when user pressed ສຳເລັດ
   const prev = document.getElementById('previewCanvas');
-  // Copy from the live canvas (already rendered correctly with DPR)
-  const pw = src.offsetWidth, ph = src.offsetHeight;
-  prev.width = Math.round(pw * getDPR());
-  prev.height = Math.round(ph * getDPR());
-  prev.style.width = '100%';
-  prev.style.height = 'auto';
-  prev.style.borderRadius = '10px';
-  const pctx = prev.getContext('2d');
-  // Just copy pixels from the live canvas
-  pctx.drawImage(src, 0, 0);
+  if (canvasSnapshot) {
+    const snapImg = new Image();
+    snapImg.onload = () => {
+      prev.width = snapImg.width;
+      prev.height = snapImg.height;
+      prev.style.width = '100%';
+      prev.style.height = 'auto';
+      prev.style.borderRadius = '10px';
+      prev.getContext('2d').drawImage(snapImg, 0, 0);
+    };
+    snapImg.src = canvasSnapshot;
+  } else {
+    prev.style.display = 'none';
+  }
 
   if (!charms.length) { tot.textContent = '0 ກີບ'; return; }
 
@@ -419,8 +428,9 @@ function sendWA() {
 }
 function openIG() { window.open(IG, '_blank'); }
 function dlImg() {
-  const c = getCV(), a = document.createElement('a');
-  a.href = c.toDataURL('image/png'); a.download = 'bai_boua_design.png'; a.click();
+  const url = canvasSnapshot || getCV().toDataURL('image/png');
+  const a = document.createElement('a');
+  a.href = url; a.download = 'bai_boua_design.png'; a.click();
 }
 
 
