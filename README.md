@@ -1,22 +1,12 @@
-# Bai Boua Italian Charm · ໃບບົວ
+# Bai Boua Italian Charm — Fast Catalog v10
 
-## ໄຟລ໌ທີ່ຕ້ອງ upload (5 ໄຟລ໌ເທົ່ານັ້ນ)
-```
-index.html   ← ໜ້າຫລັກ
-style.css    ← ຮູບແບບ
-app.js       ← ໂຄ້ດ
-data.js      ← ຂໍ້ມູນ + ຮູບທັງໝົດ (ໃຫຍ່ ~5MB)
-README.md    ← ໄຟລ໌ນີ້
-```
+- Replaced the previous charm catalog with the new uploaded folder catalog.
+- Prices are read from the nearest folder name containing a price; BB01 defaults to 27,000 kip unless a set overrides it.
+- Catalog flow: group -> set cover image -> individual charms.
+- 1,833 product images across 89 sets.
+- Images converted to lightweight WebP and loaded lazily/on demand.
+- Original new catalog image payload (~264.6 MB) reduced to ~18 MB for faster browsing.
+- Product images are preprocessed; no heavy background-removal step runs in the browser.
+- No cross-session design restore/autosave.
 
-## ວິທີ upload ໃສ່ GitHub
-
-1. ໄປ repository ຂອງທ່ານ
-2. ກົດ **"uploading an existing file"** ຫຼື **"Add file → Upload files"**
-3. ລາກ **5 ໄຟລ໌** ນີ້ (ບໍ່ຕ້ອງລາກໂຟລເດີ້) ໃສ່ຊ່ອງ drag
-4. ກົດ **"Commit changes"**
-5. ໄປ Settings → Pages → Source: main branch
-6. ໄດ້ URL!
-
-## ໝາຍເຫດ
-ຮູບທັງໝົດຖືກຝັງໄວ້ໃນ data.js ແລ້ວ ບໍ່ຕ້ອງໃຊ້ໂຟລເດີ້ images/
+Open `index.html`.

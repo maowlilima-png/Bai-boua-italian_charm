@@ -1,160 +1,180 @@
 <!DOCTYPE html>
 <html lang="lo">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
-<title>Bai Boua Italian Charm · ໃບບົວ</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#402615">
+  <title>Bai Boua Italian Charm · ໃບບົວ</title>
+  <link rel="stylesheet" href="style.css?v=19">
 </head>
 <body>
 
-<!-- INTRO -->
-<div class="intro-overlay" id="intro">
-  <div class="intro-img-wrap" id="introWrap"></div>
-  <div class="intro-dots" id="introDots"></div>
-  <button class="intro-btn" id="introBtn" onclick="nextIntro()">ຕໍ່ໄປ →</button>
-  <div class="intro-skip" onclick="closeIntro()">ຂ້າມ / ປິດ</div>
+<div class="startup" id="startup" aria-live="polite">
+  <div class="startup-logo">Bai Boua</div>
+  <div class="startup-text">ກຳລັງກຽມຊາມ...</div>
 </div>
 
-<!-- NAV -->
+<!-- INTRO: shown once, can be opened again from the top-right ? button -->
+<div class="intro-overlay" id="intro" hidden>
+  <div class="intro-img-wrap" id="introWrap"></div>
+  <div class="intro-dots" id="introDots"></div>
+  <button class="intro-btn" id="introBtn" type="button" onclick="nextIntro()">ຕໍ່ໄປ →</button>
+  <button class="intro-skip" type="button" onclick="closeIntro()">ຂ້າມ / ປິດ</button>
+</div>
+
 <nav class="nav">
-  <div>
+  <div class="brand">
     <div class="nav-logo">Bai Boua</div>
     <div class="nav-sub">Italian Charm · ໃບບົວ</div>
   </div>
   <div class="nav-tabs">
-    <button class="nav-tab active" id="tab-home" onclick="goScreen('home')">ໜ້າຫລັກ</button>
-    <button class="nav-tab" id="tab-designer" onclick="goScreen('designer')">ຈັດຊາມ</button>
-    <button class="nav-tab" id="tab-summary" onclick="goScreen('summary')">ສຳເລັດ</button>
+    <button class="nav-tab active" id="tab-home" type="button" onclick="goScreen('home')">ໜ້າຫລັກ</button>
+    <button class="nav-tab" id="tab-designer" type="button" onclick="goScreen('designer')">ຈັດຊາມ</button>
+    <button class="nav-tab" id="tab-summary" type="button" onclick="goScreen('summary')">ສຳເລັດ</button>
+  </div>
+  <div class="nav-tools">
+    <button class="icon-btn" id="soundBtn" type="button" onclick="toggleSound()" title="ປິດ/ເປີດສຽງ">🔊</button>
+    <button class="icon-btn" type="button" onclick="showIntro(true)" title="ວິທີໃຊ້">?</button>
   </div>
 </nav>
 
-<!-- HOME -->
-<div class="screen active" id="screen-home">
-  <div class="hero">
-    <div class="hero-tag">✦ Italian Charm Collection ✦</div>
-    <h1 class="hero-title">ເລືອກຊາມ ແລະ<br><em>ອອກແບບ</em>ໄດ້ດ້ວຍຕົວເອງ</h1>
-    <p class="hero-sub">ເລືອກຊາມ · ຈັດຮູບແບບ · ສົ່ງໃຫ້ຮ້ານ</p>
-    <button class="hero-btn" onclick="goScreen('designer')">ເລີ່ມຈັດສາຍແຂນ →</button>
-  </div>
-  <div class="features">
-    <div class="feat"><div class="feat-icon">💎</div><div class="feat-txt">ຊາມແທ້</div></div>
-    <div class="feat"><div class="feat-icon">✨</div><div class="feat-txt">ຈັດໄດ້ເອງ</div></div>
-    <div class="feat"><div class="feat-icon">📸</div><div class="feat-txt">ສົ່ງຮູບ</div></div>
-    <div class="feat"><div class="feat-icon">🎁</div><div class="feat-txt">ຂອງຂວັນ</div></div>
-  </div>
-  <div class="cat-section">
-    <div class="sec-head"><h2 class="sec-title">ໝວດຊາມທັງໝົດ</h2><div class="sec-line"></div></div>
-    <div class="cat-grid" id="catGrid"></div>
-  </div>
-</div>
+<main>
+  <!-- HOME -->
+  <section class="screen active" id="screen-home">
+    <div class="hero">
+      <div class="hero-tag">✦ Italian Charm Collection ✦</div>
+      <h1 class="hero-title">ເລືອກຊາມ ແລະ<br><em>ອອກແບບ</em>ໄດ້ດ້ວຍຕົວເອງ</h1>
+      <p class="hero-sub">ເລືອກຊຸດ · ເລືອກຊາມ · ຈັດຮູບແບບ · ສົ່ງໃຫ້ຮ້ານ</p>
+      <button class="hero-btn" type="button" onclick="goScreen('designer')">ເລີ່ມຈັດສາຍແຂນ →</button>
+    </div>
+    <div class="features">
+      <div class="feat"><div class="feat-icon">🔎</div><div class="feat-txt">ຄົ້ນຫາລະຫັດ</div></div>
+      <div class="feat"><div class="feat-icon">↶</div><div class="feat-txt">Undo / Redo</div></div>
+      <div class="feat"><div class="feat-icon">⚡</div><div class="feat-txt">ໂຫຼດຮູບເມື່ອຕ້ອງໃຊ້</div></div>
+      <div class="feat"><div class="feat-icon">📸</div><div class="feat-txt">ຮູບສະອາດ</div></div>
+    </div>
+    <div class="cat-section">
+      <div class="sec-head"><h2 class="sec-title">ເລືອກຊຸດຊາມ</h2><div class="sec-line"></div></div>
+      <div class="home-group-tabs" id="homeGroupTabs"></div>
+      <div class="cat-grid" id="catGrid"></div>
+    </div>
+  </section>
 
-<!-- DESIGNER -->
-<div class="screen" id="screen-designer">
-  <div class="designer">
+  <!-- DESIGNER -->
+  <section class="screen" id="screen-designer">
+    <div class="designer">
+      <div class="bracelet-area" id="braceletArea">
+        <div class="ba-hint" id="baHint">ກົດຊາມດ້ານລຸ່ມ → ລາກ ແລະຊູມໄດ້ ✦</div>
+        <canvas id="freeCanvas" aria-label="ພື້ນທີ່ຈັດຊາມ"></canvas>
 
-    <!-- Bracelet canvas -->
-    <div class="bracelet-area" id="braceletArea">
-      <div class="ba-hint" id="baHint">ກົດຊາມດ້ານລຸ່ມ → ລາກ · zoom ໄດ້ເລີຍ ✦</div>
-      <!-- Bracelet row (the metal chain visual) -->
-      <div class="bracelet-row" id="braceletRow">
-        <div class="br-clasp left-clasp"></div>
-        <div class="br-chain-area" id="chainArea">
-          <!-- charms rendered here as absolutely positioned imgs -->
-        </div>
-        <div class="br-clasp right-clasp"></div>
-      </div>
-      <!-- Free-floating charms canvas overlaid -->
-      <canvas id="freeCanvas"></canvas>
-      <!-- Toolbar: horizontal strip at top, no overlap -->
-      <div class="toolbar-strip">
-        <!-- Layer toggle left -->
-        <div class="tb-layer-wrap">
-          <button class="tb-btn tb-layer-btn" onclick="toggleLayer()">⊞ <span id="layerToggleIcon">▼</span></button>
-          <div class="layer-dropdown" id="layerBody" style="display:none">
-            <div id="layerList"><div class="lp-empty">ຍັງບໍ່ມີ</div></div>
+        <div class="toolbar-strip">
+          <div class="tb-layer-wrap">
+            <button class="tb-btn tb-layer-btn" type="button" onclick="toggleLayer()">ລາຍການທີ່ເລືອກ <span id="layerToggleIcon">▼</span></button>
+            <div class="layer-dropdown" id="layerBody" hidden>
+              <div id="layerList"><div class="lp-empty">ຍັງບໍ່ມີ</div></div>
+            </div>
+          </div>
+          <div class="tb-controls" role="toolbar" aria-label="ເຄື່ອງມືຈັດຊາມ">
+            <button class="tb-btn" id="undoBtn" type="button" onclick="undoDesign()" title="Undo">↶</button>
+            <button class="tb-btn" id="redoBtn" type="button" onclick="redoDesign()" title="Redo">↷</button>
+            <div class="tb-divider"></div>
+            <button class="tb-btn" type="button" onclick="mCharm(-1,0)" title="ຊ້າຍ">←</button>
+            <button class="tb-btn" type="button" onclick="mCharm(0,-1)" title="ຂຶ້ນ">↑</button>
+            <button class="tb-btn cc2" type="button" onclick="cCenter()" title="ກາງ">◉</button>
+            <button class="tb-btn" type="button" onclick="mCharm(0,1)" title="ລົງ">↓</button>
+            <button class="tb-btn" type="button" onclick="mCharm(1,0)" title="ຂວາ">→</button>
+            <div class="tb-divider"></div>
+            <button class="tb-btn" type="button" onclick="rSize(8)" title="ຂະຫຍາຍ">＋</button>
+            <button class="tb-btn" type="button" onclick="rSize(-8)" title="ຫຍໍ້">－</button>
+            <button class="tb-btn" type="button" onclick="autoArrange()" title="ຈັດຮຽງອັດຕະໂນມັດ">≡</button>
+            <button class="tb-btn danger-lite" type="button" onclick="clearDesign()" title="ລ້າງທັງໝົດ">⌫</button>
+            <div class="tb-divider"></div>
+            <button class="tb-btn" type="button" onclick="lFwd()" title="ຂຶ້ນຊັ້ນ">▲</button>
+            <button class="tb-btn" type="button" onclick="lBack()" title="ລົງຊັ້ນ">▼</button>
           </div>
         </div>
-        <!-- Controls inline -->
-        <div class="tb-controls">
-          <button class="tb-btn" onclick="mCharm(-1,0)">←</button>
-          <button class="tb-btn" onclick="mCharm(0,-1)">↑</button>
-          <button class="tb-btn cc2" onclick="cCenter()">◉</button>
-          <button class="tb-btn" onclick="mCharm(0,1)">↓</button>
-          <button class="tb-btn" onclick="mCharm(1,0)">→</button>
-          <div class="tb-divider"></div>
-          <button class="tb-btn" onclick="rSize(10)">＋</button>
-          <button class="tb-btn" onclick="rSize(-10)">－</button>
-          <div class="tb-divider"></div>
-          <button class="tb-btn" onclick="lFwd()">▲</button>
-          <button class="tb-btn" onclick="lBack()">▼</button>
+      </div>
+
+      <div class="sumbar">
+        <div><div class="sum-lbl">ຊາມ</div><div class="sum-n" id="sumCount">0 ຊິ້ນ</div></div>
+        <div class="sum-price-block"><div class="sum-lbl">ລາຄາລວມ</div><div class="sum-p" id="sumPrice">0 ກີບ</div></div>
+        <button class="save-btn" id="saveBtn" type="button" onclick="goScreen('summary')" disabled>ສຳເລັດ →</button>
+      </div>
+
+      <div class="picker">
+        <div class="picker-filter">
+          <label class="search-box">
+            <span>⌕</span>
+            <input id="charmSearch" type="search" placeholder="ຄົ້ນຫາເຊັດ ຫຼື code Charm..." autocomplete="off">
+          </label>
+          <select id="priceFilter" aria-label="ກອງຕາມລາຄາ">
+            <option value="0">ທຸກລາຄາ</option>
+            <option value="25000">≤ 25K</option>
+            <option value="30000">≤ 30K</option>
+            <option value="35000">≤ 35K</option>
+            <option value="45000">≤ 45K</option>
+            <option value="55000">≤ 55K</option>
+          </select>
+          <button class="fav-filter" id="favFilter" type="button" onclick="toggleFavoritesOnly()" title="ສະແດງສະເພາະທີ່ມັກ">♡</button>
+        </div>
+        <div class="picker-cats" id="pickerCats"></div>
+        <div class="set-browser-row">
+          <button id="backToSets" class="back-to-sets" type="button" hidden>← ກັບໄປເຊັດທັງໝົດ</button>
+          <div class="set-view-title" id="setViewTitle">ເລືອກເຊັດຊາມ</div>
+        </div>
+        <div class="results-line" id="resultsLine"></div>
+        <div class="charm-grid-wrap" id="charmGridWrap"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUMMARY -->
+  <section class="screen" id="screen-summary">
+    <div class="sumpage">
+      <div class="sumpage-title">ກວດສອບຄຳສັ່ງ ✦</div>
+      <div class="sumpage-sub">ຮູບທີ່ດາວໂຫຼດຈະບໍ່ມີເສັ້ນຊ່ວຍ ຫຼືກອບເລືອກ</div>
+
+      <div class="preview-card">
+        <canvas id="previewCanvas"></canvas>
+      </div>
+
+      <div class="order-card">
+        <div class="card-heading">ລາຍການຊາມ</div>
+        <div id="orderList"></div>
+        <div class="order-total">
+          <div><div class="ot-lbl">ລາຄາຊາມ</div></div>
+          <div class="ot-price" id="orderTotal">0 ກີບ</div>
         </div>
       </div>
-    </div>
 
-    <!-- Sumbar -->
-    <div class="sumbar">
-      <div><div class="sum-lbl">ຊາມ</div><div class="sum-n" id="sumCount">0 ຊິ້ນ</div></div>
-      <div style="text-align:center"><div class="sum-lbl">ລາຄາລວມ</div><div class="sum-p" id="sumPrice">0 ກີບ</div></div>
-      <button class="save-btn" id="saveBtn" onclick="goScreen('summary')" disabled>ສຳເລັດ 💾</button>
-    </div>
+      <div class="contact-card">
+        <div class="cc-title">ຕິດຕໍ່ຮ້ານ</div>
+        <div class="cc-row"><span>📱</span><div><div class="cc-lbl">WhatsApp / ໂທ</div><div class="cc-val">+856 20 99809749</div></div></div>
+        <div class="cc-row"><span>📸</span><div><div class="cc-lbl">Instagram</div><div class="cc-val">@maliluv_bb</div></div></div>
+      </div>
 
-    <!-- Picker -->
-    <div class="picker">
-      <div class="picker-cats" id="pickerCats"></div>
-      <div class="charm-grid-wrap" id="charmGridWrap"></div>
-    </div>
-  </div>
-</div>
-
-<!-- SUMMARY -->
-<div class="screen" id="screen-summary">
-  <div class="sumpage">
-    <div class="sumpage-title">ສຳເລັດແລ້ວ ✦</div>
-    <div class="sumpage-sub">ກວດສອບຊາມ ແລ້ວສົ່ງໃຫ້ຮ້ານ</div>
-
-    <!-- Design preview -->
-    <div class="preview-card">
-      <canvas id="previewCanvas" style="width:100%;border-radius:10px;background:linear-gradient(135deg,#faf8f4,#ede8de)"></canvas>
-    </div>
-
-    <!-- Order details -->
-    <div class="order-card">
-      <div id="orderList"></div>
-      <div class="order-total">
-        <div><div class="ot-lbl">ລາຄາທັງໝົດ</div></div>
-        <div class="ot-price" id="orderTotal">0 ກີບ</div>
+      <div class="act-btns primary-actions">
+        <button class="act-btn wa" type="button" onclick="sendWA()">💬 WhatsApp</button>
+      </div>
+      <div class="act-btns">
+        <button class="act-btn ig" type="button" onclick="openIG()">📸 Instagram</button>
+        <button class="act-btn sec" type="button" onclick="dlImg()">📥 ດາວໂຫຼດຮູບ</button>
       </div>
     </div>
+  </section>
+</main>
 
-    <!-- Contact -->
-    <div class="contact-card">
-      <div class="cc-title">ຕິດຕໍ່ຮ້ານ</div>
-      <div class="cc-row"><span>📱</span><div><div class="cc-lbl">WhatsApp / ໂທ</div><div class="cc-val">+856 20 99809749</div></div></div>
-      <div class="cc-row"><span>📸</span><div><div class="cc-lbl">Instagram</div><div class="cc-val">@maliluv_bb</div></div></div>
-    </div>
-
-    <div class="act-btns" style="margin-bottom:10px">
-      <button class="act-btn wa" onclick="sendWA()">💬 WhatsApp ສົ່ງຄຳສັ່ງ</button>
-    </div>
-    <div class="act-btns">
-      <button class="act-btn ig" onclick="openIG()">📸 Instagram</button>
-      <button class="act-btn sec" onclick="dlImg()">📥 ດາວໂຫລດຮູບ</button>
-    </div>
-  </div>
-</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
-// Prevent double-tap zoom on all elements
-let lastTap=0;
-document.addEventListener('touchend',function(e){
-  const now=Date.now();
-  if(now-lastTap<350){e.preventDefault();}
-  lastTap=now;
-},{passive:false});
+let lastTap = 0;
+document.addEventListener('touchend', function(e) {
+  const now = Date.now();
+  if (now - lastTap < 350) e.preventDefault();
+  lastTap = now;
+}, { passive: false });
 </script>
-<script src="data.js"></script>
-<script src="app.js"></script>
+<script src="data.js?v=19"></script>
+<script src="app.js?v=19"></script>
 </body>
 </html>
