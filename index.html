@@ -213,21 +213,27 @@
       </label>
     </div>
 
+    <div class="random-blank-section" id="randomBlankSection">
+      <div class="random-section-head compact">
+        <div class="random-section-title">ເລືອກແບບຊາມເປົ່າ <small>ຊາມເປົ່າຈະຖືກຈັດໄວ້ທາງຊ້າຍ ແລະ ຂວາ · ກົງກາງຈະເປັນຊາມມີລາຍ</small></div>
+        <span class="random-start-pill" id="randomBlankStartPrice">ເລີ່ມຕົ້ນ 0 ກີບ</span>
+      </div>
+      <div class="random-blank-grid" id="randomBlankGrid"></div>
+    </div>
+
     <div class="random-set-section" id="randomSetSection">
       <div class="random-section-head">
         <div class="random-section-title">ເລືອກເຊັດທີ່ໃຊ້ສຸ່ມ <small>ຕິກໄວ້ = ເອົາເຊັດນີ້ມາສຸ່ມ · ເອົາຕິກອອກ = ບໍ່ໃຊ້</small></div>
-        <span class="random-set-count" id="randomSelectedSetCount"></span>
+        <div class="random-set-head-right">
+          <span class="random-start-pill" id="randomMainStartPrice">ເລີ່ມຕົ້ນ 0 ກີບ</span>
+          <span class="random-set-count" id="randomSelectedSetCount"></span>
+        </div>
       </div>
       <div class="random-set-global-tools">
         <button type="button" onclick="setAllRandomSets(true)">✓ ເລືອກທັງໝົດ</button>
         <button type="button" onclick="setAllRandomSets(false)">ລ້າງທັງໝົດ</button>
       </div>
       <div class="random-set-groups" id="randomSetGroups"></div>
-    </div>
-
-    <div class="random-blank-section" id="randomBlankSection">
-      <div class="random-section-title">ເລືອກແບບຊາມເປົ່າ <small>ຖ້າເລືອກ 0 ຊິ້ນ ສ່ວນນີ້ຈະບໍ່ຖືກໃຊ້</small></div>
-      <div class="random-blank-grid" id="randomBlankGrid"></div>
     </div>
 
     <div class="random-estimate" id="randomEstimate"></div>

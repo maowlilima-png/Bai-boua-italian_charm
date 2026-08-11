@@ -996,7 +996,8 @@ function allRandomMainSets() {
         id: sub.id || `${cat.cat}-${subIndex}`,
         name: sub.subname || `ເຊັດ ${subIndex + 1}`,
         price: Number(sub.price) || 0,
-        count: sub.imgs?.length || 0
+        count: sub.imgs?.length || 0,
+        cover: sub.cover || sub.imgs?.[0] || ''
       });
     });
   });
@@ -1056,7 +1057,8 @@ function renderRandomSetOptions() {
       id: sub.id || `${cat.cat}-${subIndex}`,
       name: sub.subname || `ເຊັດ ${subIndex + 1}`,
       price: Number(sub.price) || 0,
-      count: sub.imgs?.length || 0
+      count: sub.imgs?.length || 0,
+      cover: sub.cover || sub.imgs?.[0] || ''
     }));
     const selectedCount = sets.filter(set => randomSelectedSetIds.has(set.id)).length;
     const details = document.createElement('details');
@@ -1089,9 +1091,14 @@ function renderRandomSetOptions() {
       label.className = `random-set-check${randomSelectedSetIds.has(set.id) ? ' active' : ''}`;
       label.innerHTML = `
         <input type="checkbox" ${randomSelectedSetIds.has(set.id) ? 'checked' : ''}>
+        <img class="random-set-check-thumb" alt="${escapeHTML(set.name)}">
         <span class="random-set-check-name">${escapeHTML(set.name)}</span>
         <small>${set.count} ແບບ · ${set.price.toLocaleString()} ກີບ</small>`;
       label.querySelector('input').addEventListener('change', event => toggleRandomSet(set.id, event.target.checked));
+      const img = label.querySelector('.random-set-check-thumb');
+      resolveAssetSrc(set.cover).then(resolved => {
+        if (resolved && img.isConnected) img.src = resolved;
+      });
       checks.appendChild(label);
     });
     container.appendChild(details);
@@ -1099,6 +1106,7 @@ function renderRandomSetOptions() {
   randomSetRendered = true;
   const selectedTotal = document.getElementById('randomSelectedSetCount');
   if (selectedTotal) selectedTotal.textContent = `${randomSelectedSetIds.size} ເຊັດ`;
+  updateRandomMetaInfo();
 }
 
 function setRandomBudget(value) {
@@ -1139,11 +1147,13 @@ function renderRandomBlankOptions() {
     });
   });
   randomBlankRendered = true;
+  updateRandomMetaInfo();
 }
 
 function selectRandomBlank(code) {
   randomBlankCode = code;
   renderRandomBlankOptions();
+  updateRandomMetaInfo();
   updateRandomEstimate();
 }
 
@@ -1163,6 +1173,23 @@ function getSelectedBlankPrice() {
   if (!blanks.length) return 0;
   if (randomBlankCode === '__random__') return Math.min(...blanks.map(item => Number(item.price) || 0));
   return Number(blanks.find(item => item.code === randomBlankCode)?.price) || 0;
+}
+
+
+function getRandomMainStartPrice() {
+  const main = randomMainItems();
+  if (!main.length) return 0;
+  const prices = main.map(item => Number(item.price) || 0).filter(Boolean);
+  return prices.length ? Math.min(...prices) : 0;
+}
+
+function updateRandomMetaInfo() {
+  const blankEl = document.getElementById('randomBlankStartPrice');
+  const mainEl = document.getElementById('randomMainStartPrice');
+  const blankPrice = getSelectedBlankPrice();
+  const mainPrice = getRandomMainStartPrice();
+  if (blankEl) blankEl.textContent = `ຊາມເປົ່າ · ເລີ່ມຕົ້ນ ${blankPrice.toLocaleString()} ກີບ`;
+  if (mainEl) mainEl.textContent = `ຊາມມີລາຍ · ເລີ່ມຕົ້ນ ${mainPrice.toLocaleString()} ກີບ`;
 }
 
 function updateRandomEstimate() {
@@ -1199,6 +1226,7 @@ function openRandomDesigner() {
   if (!randomBlankRendered) renderRandomBlankOptions();
   renderRandomSetOptions();
   syncRandomBlankQty();
+  updateRandomMetaInfo();
   updateRandomEstimate();
   overlay.hidden = false;
   document.body.style.overflow = 'hidden';
@@ -1306,12 +1334,10 @@ function mergeRandomSequence(mainItems, blankItems) {
   const main = shuffleCopy(mainItems);
   const blanks = shuffleCopy(blankItems);
   if (!blanks.length) return main;
-  const result = main.slice();
-  blanks.forEach((blank, index) => {
-    const position = Math.min(result.length, Math.round(((index + 1) * (result.length + 1)) / (blanks.length + 1)));
-    result.splice(position, 0, blank);
-  });
-  return result;
+  const leftCount = Math.ceil(blanks.length / 2);
+  const leftBlanks = blanks.slice(0, leftCount);
+  const rightBlanks = blanks.slice(leftCount);
+  return [...leftBlanks, ...main, ...rightBlanks.reverse()];
 }
 
 function captureRandomConfig() {
