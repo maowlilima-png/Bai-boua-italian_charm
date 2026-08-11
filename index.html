@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#402615">
   <title>Bai Boua Italian Charm · ໃບບົວ</title>
-  <link rel="stylesheet" href="style.css?v=19">
+  <link rel="stylesheet" href="style.css?v=22">
 </head>
 <body>
 
@@ -68,11 +68,14 @@
         <canvas id="freeCanvas" aria-label="ພື້ນທີ່ຈັດຊາມ"></canvas>
 
         <div class="toolbar-strip">
-          <div class="tb-layer-wrap">
-            <button class="tb-btn tb-layer-btn" type="button" onclick="toggleLayer()">ລາຍການທີ່ເລືອກ <span id="layerToggleIcon">▼</span></button>
-            <div class="layer-dropdown" id="layerBody" hidden>
-              <div id="layerList"><div class="lp-empty">ຍັງບໍ່ມີ</div></div>
+          <div class="tb-left-actions">
+            <div class="tb-layer-wrap">
+              <button class="tb-btn tb-layer-btn" type="button" onclick="toggleLayer()">ລາຍການທີ່ເລືອກ <span id="layerToggleIcon">▼</span></button>
+              <div class="layer-dropdown" id="layerBody" hidden>
+                <div id="layerList"><div class="lp-empty">ຍັງບໍ່ມີ</div></div>
+              </div>
             </div>
+            <button class="tb-btn tb-auto-btn" type="button" onclick="autoArrange()" title="ຈັດຊາມອັດຕະໂນມັດ">ຈັດຊາມ Auto</button>
           </div>
           <div class="tb-controls" role="toolbar" aria-label="ເຄື່ອງມືຈັດຊາມ">
             <button class="tb-btn" id="undoBtn" type="button" onclick="undoDesign()" title="Undo">↶</button>
@@ -86,11 +89,7 @@
             <div class="tb-divider"></div>
             <button class="tb-btn" type="button" onclick="rSize(8)" title="ຂະຫຍາຍ">＋</button>
             <button class="tb-btn" type="button" onclick="rSize(-8)" title="ຫຍໍ້">－</button>
-            <button class="tb-btn" type="button" onclick="autoArrange()" title="ຈັດຮຽງອັດຕະໂນມັດ">≡</button>
             <button class="tb-btn danger-lite" type="button" onclick="clearDesign()" title="ລ້າງທັງໝົດ">⌫</button>
-            <div class="tb-divider"></div>
-            <button class="tb-btn" type="button" onclick="lFwd()" title="ຂຶ້ນຊັ້ນ">▲</button>
-            <button class="tb-btn" type="button" onclick="lBack()" title="ລົງຊັ້ນ">▼</button>
           </div>
         </div>
       </div>
@@ -174,7 +173,7 @@ document.addEventListener('touchend', function(e) {
   lastTap = now;
 }, { passive: false });
 </script>
-<script src="data.js?v=19"></script>
-<script src="app.js?v=19"></script>
+<script src="data.js?v=22"></script>
+<script src="app.js?v=22"></script>
 </body>
 </html>

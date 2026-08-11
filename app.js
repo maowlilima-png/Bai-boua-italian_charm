@@ -909,7 +909,7 @@ function autoArrange() {
     clampCharm(charm);
   });
   commitChange();
-  showToast('ຈັດຮຽງໃຫ້ແລ້ວ');
+  showToast('ຈັດຊາມອັດຕະໂນມັດໃຫ້ແລ້ວ ✓');
 }
 
 function clearDesign() {

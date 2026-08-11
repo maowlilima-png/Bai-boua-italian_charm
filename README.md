@@ -1,12 +1,13 @@
-# Bai Boua Italian Charm — Fast Catalog v10
+# Bai Boua Italian Charm — GitHub Upload Ready v22
 
-- Replaced the previous charm catalog with the new uploaded folder catalog.
-- Prices are read from the nearest folder name containing a price; BB01 defaults to 27,000 kip unless a set overrides it.
-- Catalog flow: group -> set cover image -> individual charms.
-- 1,833 product images across 89 sets.
-- Images converted to lightweight WebP and loaded lazily/on demand.
-- Original new catalog image payload (~264.6 MB) reduced to ~18 MB for faster browsing.
-- Product images are preprocessed; no heavy background-removal step runs in the browser.
-- No cross-session design restore/autosave.
+ເວີຊັນນີ້ໃຊ້ຊຸດ Charm ຈາກ `Bai-boua-italian charm 2.zip` ແທນຂອງເກົ່າທັງໝົດ.
+ອັນທີ່ເຈົ້າລົບອອກຈາກໄຟລ໌ໃໝ່ຈະບໍ່ຢູ່ໃນເວັບ.
 
-Open `index.html`.
+- BB01: 66 ເຊັດ / 1379 ຊາມ
+- BB02: 5 ເຊັດ / 111 ຊາມ
+- BB03: 6 ເຊັດ / 137 ຊາມ
+- BB04: 21 ເຊັດ / 339 ຊາມ
+- BB05: 8 ເຊັດ / 68 ຊາມ
+- ຊາມເປົ່າ: 1 ເຊັດ / 10 ຊາມ
+
+ແຕກ ZIP → ເລືອກທຸກໄຟລ໌ → Upload files ໃນ GitHub → Commit changes.
