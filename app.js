@@ -40,6 +40,8 @@ let historyIndex = -1;
 let applyingHistory = false;
 let setGridScrollMemory = {};
 let restoreSetScrollOnNextGrid = false;
+let randomBlankCode = '__random__';
+let randomBlankRendered = false;
 
 const IMGS = {};
 const BG_CACHE = {};
@@ -925,6 +927,291 @@ function autoArrange() {
   showToast('ຈັດຊາມອັດຕະໂນມັດໃຫ້ແລ້ວ ✓');
 }
 
+
+// ===== RANDOM DESIGNER =====
+function randomBlankItems() {
+  return CATALOG.filter(item => item.cat === 'ຊາມເປົ່າ');
+}
+
+function randomMainItems() {
+  return CATALOG.filter(item => item.cat !== 'ຊາມເປົ່າ' && Number(item.price) > 0);
+}
+
+function setRandomBudget(value) {
+  const input = document.getElementById('randomBudget');
+  if (!input) return;
+  input.value = Number(value) || 0;
+  updateRandomEstimate();
+}
+
+function getRandomTargetCount() {
+  return Math.max(1, Number(document.getElementById('randomWrist')?.value) || 18);
+}
+
+function renderRandomBlankOptions() {
+  const grid = document.getElementById('randomBlankGrid');
+  if (!grid) return;
+  const blanks = randomBlankItems();
+  grid.innerHTML = '';
+
+  const randomCard = document.createElement('button');
+  randomCard.type = 'button';
+  randomCard.className = `random-blank-card random-choice${randomBlankCode === '__random__' ? ' active' : ''}`;
+  randomCard.innerHTML = '<span class="random-dice">🎲</span><strong>ສຸ່ມແບບ</strong>';
+  randomCard.addEventListener('click', () => selectRandomBlank('__random__'));
+  grid.appendChild(randomCard);
+
+  blanks.forEach(item => {
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = `random-blank-card${randomBlankCode === item.code ? ' active' : ''}`;
+    card.dataset.code = item.code;
+    card.innerHTML = `<img alt="${escapeHTML(item.code)}"><strong>${escapeHTML(item.code)}</strong>`;
+    card.addEventListener('click', () => selectRandomBlank(item.code));
+    grid.appendChild(card);
+    const img = card.querySelector('img');
+    resolveAssetSrc(item.src).then(resolved => {
+      if (resolved && img.isConnected) img.src = resolved;
+    });
+  });
+  randomBlankRendered = true;
+}
+
+function selectRandomBlank(code) {
+  randomBlankCode = code;
+  renderRandomBlankOptions();
+  updateRandomEstimate();
+}
+
+function syncRandomBlankQty() {
+  const input = document.getElementById('randomBlankQty');
+  if (!input) return;
+  const target = getRandomTargetCount();
+  input.max = String(target);
+  const value = Math.max(0, Math.min(target, Number(input.value) || 0));
+  input.value = String(value);
+  const section = document.getElementById('randomBlankSection');
+  if (section) section.classList.toggle('muted', value === 0);
+}
+
+function getSelectedBlankPrice() {
+  const blanks = randomBlankItems();
+  if (!blanks.length) return 0;
+  if (randomBlankCode === '__random__') return Math.min(...blanks.map(item => Number(item.price) || 0));
+  return Number(blanks.find(item => item.code === randomBlankCode)?.price) || 0;
+}
+
+function updateRandomEstimate() {
+  syncRandomBlankQty();
+  const estimate = document.getElementById('randomEstimate');
+  const submit = document.getElementById('randomSubmit');
+  if (!estimate) return;
+  const budget = Math.max(0, Number(document.getElementById('randomBudget')?.value) || 0);
+  const target = getRandomTargetCount();
+  const blankQty = Math.max(0, Number(document.getElementById('randomBlankQty')?.value) || 0);
+  const blankPrice = getSelectedBlankPrice();
+  const main = randomMainItems();
+  const minMain = main.length ? Math.min(...main.map(item => Number(item.price) || 0).filter(Boolean)) : 0;
+  const minRequired = blankQty * blankPrice + Math.max(0, target - blankQty) * minMain;
+  const valid = budget >= minRequired && target >= blankQty && main.length > 0;
+  estimate.classList.toggle('error', !valid);
+  estimate.innerHTML = valid
+    ? `ລະບົບຈະຈັດປະມານ <strong>${target} ຊິ້ນ</strong> · ຊາມເປົ່າ <strong>${blankQty} ຊິ້ນ</strong> · ງົບສູງສຸດ <strong>${budget.toLocaleString()} ກີບ</strong><br><small>ລາຄາຈິງຈະບໍ່ເກີນງົບ ແລະອາດເຫຼືອງົບເລັກນ້ອຍ.</small>`
+    : `ງົບນີ້ອາດບໍ່ພໍສຳລັບ ${target} ຊິ້ນ. ງົບຂັ້ນຕ່ຳປະມານ <strong>${minRequired.toLocaleString()} ກີບ</strong>.`;
+  if (submit) submit.disabled = !valid;
+}
+
+function openRandomDesigner() {
+  const overlay = document.getElementById('randomDesigner');
+  if (!overlay) return;
+  if (!randomBlankRendered) renderRandomBlankOptions();
+  syncRandomBlankQty();
+  updateRandomEstimate();
+  overlay.hidden = false;
+  document.body.style.overflow = 'hidden';
+}
+
+function closeRandomDesigner() {
+  const overlay = document.getElementById('randomDesigner');
+  if (overlay) overlay.hidden = true;
+  document.body.style.overflow = '';
+}
+
+function shuffleCopy(list) {
+  const copy = list.slice();
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function chooseBlankItems(quantity) {
+  if (quantity <= 0) return [];
+  const blanks = randomBlankItems();
+  if (!blanks.length) return [];
+  if (randomBlankCode !== '__random__') {
+    const chosen = blanks.find(item => item.code === randomBlankCode) || blanks[0];
+    return Array.from({ length: quantity }, () => chosen);
+  }
+  const shuffled = shuffleCopy(blanks);
+  return Array.from({ length: quantity }, (_, index) => shuffled[index % shuffled.length]);
+}
+
+function pickRandomMainItems(slotCount, budget) {
+  if (slotCount <= 0) return [];
+  const candidates = randomMainItems();
+  if (!candidates.length) return null;
+  const minPrice = Math.min(...candidates.map(item => Number(item.price) || 0).filter(Boolean));
+  if (budget < slotCount * minPrice) return null;
+
+  let best = null;
+  let bestGap = Infinity;
+  let bestVariety = -Infinity;
+  const attempts = Math.min(220, Math.max(80, slotCount * 9));
+
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    const pool = shuffleCopy(candidates);
+    const chosen = [];
+    const usedCodes = new Set();
+    const setCounts = new Map();
+    let spent = 0;
+
+    for (let slot = 0; slot < slotCount; slot += 1) {
+      const slotsAfter = slotCount - slot - 1;
+      const maxThis = budget - spent - slotsAfter * minPrice;
+      if (maxThis < minPrice) break;
+      const targetAvg = (budget - spent) / (slotsAfter + 1);
+
+      let bestIndex = -1;
+      let bestScore = Infinity;
+      const sampleSize = Math.min(pool.length, 90);
+      for (let sample = 0; sample < sampleSize; sample += 1) {
+        const index = Math.floor(Math.random() * pool.length);
+        const item = pool[index];
+        const price = Number(item.price) || 0;
+        if (!price || price > maxThis || usedCodes.has(item.code)) continue;
+        const sameSet = setCounts.get(item.setId) || 0;
+        const varietyPenalty = sameSet * 5000;
+        const randomness = Math.random() * 11000;
+        const score = Math.abs(price - targetAvg) + varietyPenalty + randomness;
+        if (score < bestScore) {
+          bestScore = score;
+          bestIndex = index;
+        }
+      }
+
+      if (bestIndex < 0) {
+        bestIndex = pool.findIndex(item => {
+          const price = Number(item.price) || 0;
+          return price > 0 && price <= maxThis && !usedCodes.has(item.code);
+        });
+      }
+      if (bestIndex < 0) break;
+
+      const [item] = pool.splice(bestIndex, 1);
+      chosen.push(item);
+      usedCodes.add(item.code);
+      setCounts.set(item.setId, (setCounts.get(item.setId) || 0) + 1);
+      spent += Number(item.price) || 0;
+    }
+
+    if (chosen.length !== slotCount) continue;
+    const gap = budget - spent;
+    const variety = new Set(chosen.map(item => item.setId)).size;
+    if (gap < bestGap || (gap === bestGap && variety > bestVariety)) {
+      best = chosen;
+      bestGap = gap;
+      bestVariety = variety;
+      if (gap <= 3000) break;
+    }
+  }
+  return best;
+}
+
+function mergeRandomSequence(mainItems, blankItems) {
+  const main = shuffleCopy(mainItems);
+  const blanks = shuffleCopy(blankItems);
+  if (!blanks.length) return main;
+  const result = main.slice();
+  blanks.forEach((blank, index) => {
+    const position = Math.min(result.length, Math.round(((index + 1) * (result.length + 1)) / (blanks.length + 1)));
+    result.splice(position, 0, blank);
+  });
+  return result;
+}
+
+async function generateRandomDesign() {
+  const budget = Math.max(0, Number(document.getElementById('randomBudget')?.value) || 0);
+  const targetCount = getRandomTargetCount();
+  const blankQty = Math.max(0, Math.min(targetCount, Number(document.getElementById('randomBlankQty')?.value) || 0));
+  const submit = document.getElementById('randomSubmit');
+
+  if (charms.length && !window.confirm('ການສຸ່ມຈະແທນຊາມທີ່ຈັດຢູ່ຕອນນີ້. ຕ້ອງການສຸ່ມໃໝ່ບໍ?')) return;
+
+  if (submit) {
+    submit.disabled = true;
+    submit.textContent = 'ກຳລັງສຸ່ມ...';
+  }
+
+  try {
+    const blankItems = chooseBlankItems(blankQty);
+    const blankTotal = blankItems.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+    const mainSlots = targetCount - blankItems.length;
+    const mainBudget = budget - blankTotal;
+    const mainItems = pickRandomMainItems(mainSlots, mainBudget);
+
+    if (mainSlots > 0 && (!mainItems || mainItems.length !== mainSlots)) {
+      showToast('ງົບບໍ່ພໍສຳລັບຂະໜາດທີ່ເລືອກ');
+      return;
+    }
+
+    const selectedItems = mergeRandomSequence(mainItems || [], blankItems);
+    const total = selectedItems.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
+    if (total > budget) {
+      showToast('ລອງປັບງົບແລ້ວສຸ່ມໃໝ່');
+      return;
+    }
+
+    charms = [];
+    selId = null;
+    const width = cvW();
+    const height = cvH();
+    const margin = 22;
+    const slot = Math.max(28, Math.min(66, (width - margin * 2) / Math.max(selectedItems.length, 1)));
+    const size = Math.max(26, Math.min(62, slot * .92));
+    const totalWidth = slot * selectedItems.length;
+    const startX = (width - totalWidth) / 2 + slot / 2;
+
+    selectedItems.forEach((item, index) => {
+      const charm = {
+        id: `c${++uidN}`,
+        code: item.code,
+        name: item.subname,
+        price: Number(item.price) || 0,
+        src: item.src,
+        originalSrc: item.src,
+        x: startX + index * slot,
+        y: height / 2,
+        sz: size
+      };
+      clampCharm(charm);
+      charms.push(charm);
+      prepareCharmImage(charm);
+    });
+    selId = charms.at(-1)?.id || null;
+    commitChange();
+    closeRandomDesigner();
+    showToast(`ສຸ່ມ ${selectedItems.length} ຊິ້ນ · ${total.toLocaleString()} ກີບ ✓`);
+  } finally {
+    if (submit) {
+      submit.disabled = false;
+      submit.textContent = '🎲 ສຸ່ມໃຫ້ເລີຍ';
+    }
+    updateRandomEstimate();
+  }
+}
+
 function clearDesign() {
   if (!charms.length) return;
   if (!window.confirm('ຕ້ອງການລ້າງຊາມທັງໝົດບໍ?')) return;
@@ -1442,6 +1729,17 @@ function bindInputs() {
   const backToSets = document.getElementById('backToSets');
   if (backToSets) backToSets.addEventListener('click', showAllSets);
 
+  ['randomBudget', 'randomWrist', 'randomBlankQty'].forEach(id => {
+    const element = document.getElementById(id);
+    if (!element) return;
+    element.addEventListener('input', updateRandomEstimate);
+    element.addEventListener('change', updateRandomEstimate);
+  });
+  const randomOverlay = document.getElementById('randomDesigner');
+  if (randomOverlay) randomOverlay.addEventListener('click', event => {
+    if (event.target === randomOverlay) closeRandomDesigner();
+  });
+
   ['customerName', 'customerPhone', 'braceletSize', 'deliveryMethod', 'customerAddress', 'shippingFee', 'customerNote']
     .forEach(id => {
       const element = document.getElementById(id);
@@ -1450,6 +1748,11 @@ function bindInputs() {
       element.addEventListener('change', saveCustomerForm);
     });
 }
+
+
+window.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !document.getElementById('randomDesigner')?.hidden) closeRandomDesigner();
+});
 
 function initApp() {
   updateSoundButton();

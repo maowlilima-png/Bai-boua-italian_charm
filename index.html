@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#402615">
   <title>Bai Boua Italian Charm · ໃບບົວ</title>
-  <link rel="stylesheet" href="style.css?v=24">
+  <link rel="stylesheet" href="style.css?v=25">
 </head>
 <body>
 
@@ -76,6 +76,7 @@
               </div>
             </div>
             <button class="tb-btn tb-auto-btn" type="button" onclick="autoArrange()" title="ຈັດຊາມອັດຕະໂນມັດ">ຈັດຊາມ Auto</button>
+            <button class="tb-btn tb-random-btn" type="button" onclick="openRandomDesigner()" title="ສຸ່ມຈັດຊາມຕາມງົບ ແລະຂະໜາດຂໍ້ມື">🎲 ສຸ່ມຈັດ</button>
           </div>
           <div class="tb-controls" role="toolbar" aria-label="ເຄື່ອງມືຈັດຊາມ">
             <button class="tb-btn" id="undoBtn" type="button" onclick="undoDesign()" title="Undo">↶</button>
@@ -163,6 +164,68 @@
   </section>
 </main>
 
+
+
+<!-- RANDOM DESIGNER -->
+<div class="random-overlay" id="randomDesigner" hidden>
+  <div class="random-modal" role="dialog" aria-modal="true" aria-labelledby="randomTitle">
+    <div class="random-head">
+      <div>
+        <div class="random-kicker">✦ RANDOM CHARM DESIGN ✦</div>
+        <h2 id="randomTitle">ສຸ່ມຈັດຊາມໃຫ້</h2>
+        <p>ສຳລັບລູກຄ້າທີ່ຍັງບໍ່ມີໄອເດຍ — ເລືອກງົບ ແລະຂະໜາດ ແລ້ວໃຫ້ລະບົບຈັດໃຫ້.</p>
+      </div>
+      <button class="random-close" type="button" onclick="closeRandomDesigner()" aria-label="ປິດ">×</button>
+    </div>
+
+    <div class="random-form-grid">
+      <label class="random-field random-field-wide">
+        <span>ງົບປະມານ (ກີບ)</span>
+        <input id="randomBudget" type="number" min="50000" step="10000" value="500000" inputmode="numeric">
+        <div class="budget-chips">
+          <button type="button" onclick="setRandomBudget(300000)">300K</button>
+          <button type="button" onclick="setRandomBudget(400000)">400K</button>
+          <button type="button" onclick="setRandomBudget(500000)">500K</button>
+          <button type="button" onclick="setRandomBudget(600000)">600K</button>
+          <button type="button" onclick="setRandomBudget(800000)">800K</button>
+        </div>
+      </label>
+
+      <label class="random-field">
+        <span>ຂະໜາດຂໍ້ມື</span>
+        <select id="randomWrist">
+          <option value="14">13 cm · ປະມານ 14 ຊິ້ນ</option>
+          <option value="16">14 cm · ປະມານ 16 ຊິ້ນ</option>
+          <option value="17">15 cm · ປະມານ 17 ຊິ້ນ</option>
+          <option value="18" selected>16 cm · ປະມານ 18 ຊິ້ນ</option>
+          <option value="19">17 cm · ປະມານ 19 ຊິ້ນ</option>
+          <option value="20">18 cm · ປະມານ 20 ຊິ້ນ</option>
+          <option value="21">19 cm · ປະມານ 21 ຊິ້ນ</option>
+          <option value="22">20 cm · ປະມານ 22 ຊິ້ນ</option>
+          <option value="23">21 cm · ປະມານ 23 ຊິ້ນ</option>
+        </select>
+      </label>
+
+      <label class="random-field">
+        <span>ຈຳນວນຊາມເປົ່າ</span>
+        <input id="randomBlankQty" type="number" min="0" max="18" step="1" value="0" inputmode="numeric">
+      </label>
+    </div>
+
+    <div class="random-blank-section" id="randomBlankSection">
+      <div class="random-section-title">ເລືອກແບບຊາມເປົ່າ <small>ຖ້າເລືອກ 0 ຊິ້ນ ສ່ວນນີ້ຈະບໍ່ຖືກໃຊ້</small></div>
+      <div class="random-blank-grid" id="randomBlankGrid"></div>
+    </div>
+
+    <div class="random-estimate" id="randomEstimate"></div>
+
+    <div class="random-actions">
+      <button class="random-cancel" type="button" onclick="closeRandomDesigner()">ຍົກເລີກ</button>
+      <button class="random-submit" id="randomSubmit" type="button" onclick="generateRandomDesign()">🎲 ສຸ່ມໃຫ້ເລີຍ</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -173,7 +236,7 @@ document.addEventListener('touchend', function(e) {
   lastTap = now;
 }, { passive: false });
 </script>
-<script src="data.js?v=24"></script>
-<script src="app.js?v=24"></script>
+<script src="data.js?v=25"></script>
+<script src="app.js?v=25"></script>
 </body>
 </html>
