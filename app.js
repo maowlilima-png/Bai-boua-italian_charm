@@ -479,6 +479,17 @@ function enhanceThumbImage(imgEl, src) {
   });
 }
 
+// Use the automatic background remover only for individual Charm images.
+// Set-cover images stay untouched so the customer still sees the full set preview.
+function enhanceCharmThumbImage(imgEl, src) {
+  if (!imgEl || !src) return;
+  imgEl.dataset.src = src;
+  cleanImageSource(src).then(cleaned => {
+    if (!cleaned || !imgEl.isConnected || imgEl.dataset.src !== src) return;
+    imgEl.src = cleaned;
+  });
+}
+
 function migrateAssetPath(src) {
   if (!src) return src;
   return src.replace('assets/images/', 'assets/images-v3/');
@@ -488,8 +499,10 @@ function migrateAssetPath(src) {
 function prepareCharmImage(charm) {
   const original = charm.originalSrc || charm.src;
   charm.originalSrc = original;
-  charm.src = original;
-  loadImg(original).then(() => draw());
+  cleanImageSource(original).then(cleaned => {
+    charm.src = cleaned || original;
+    loadImg(charm.src).then(() => draw());
+  });
 }
 
 
@@ -1171,7 +1184,7 @@ function renderCharmGrid() {
       event.currentTarget.closest('.charm-img-wrap').classList.add('img-error');
       event.currentTarget.alt = 'ຮູບໂຫຼດບໍ່ໄດ້';
     });
-    enhanceThumbImage(img, item.src);
+    enhanceCharmThumbImage(img, item.src);
     grid.appendChild(card);
   });
   wrap.appendChild(grid);
