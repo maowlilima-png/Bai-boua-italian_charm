@@ -486,7 +486,7 @@ img { display: block; }
   place-items: center;
   overflow: hidden;
   border-radius: 8px;
-  background: #f7f3ec;
+  background: transparent;
   padding: 2px;
 }
 .charm-img-wrap img { width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; display: block; margin: auto; }
@@ -929,4 +929,12 @@ img { display: block; }
   .tb-left-actions { gap: 3px; }
   .tb-layer-btn { padding-inline: 7px; font-size: 9px; }
   .tb-auto-btn { min-width: 86px; padding-inline: 7px; font-size: 9px; }
+}
+
+/* v24: individual Charm images are already background-cleaned; do not paint a fake beige image background */
+.charm-img-wrap {
+  background: transparent !important;
+}
+.charm-add {
+  background: transparent;
 }
