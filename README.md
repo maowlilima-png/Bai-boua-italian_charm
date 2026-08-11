@@ -11,3 +11,9 @@
 - ຊາມເປົ່າ: 1 ເຊັດ / 10 ຊາມ
 
 ແຕກ ZIP → ເລືອກທຸກໄຟລ໌ → Upload files ໃນ GitHub → Commit changes.
+
+
+v26 updates:
+- Random designer can include/exclude individual charm sets.
+- New quick “reroll” button reuses the last successful random settings.
+- Charm thumbnails appear immediately, background cleanup runs in a queue, and sprite sheets are preloaded for faster browsing.

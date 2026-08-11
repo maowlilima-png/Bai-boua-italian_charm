@@ -42,6 +42,14 @@ let setGridScrollMemory = {};
 let restoreSetScrollOnNextGrid = false;
 let randomBlankCode = '__random__';
 let randomBlankRendered = false;
+let randomSetRendered = false;
+let randomSetSelectionReady = false;
+let randomSelectedSetIds = new Set();
+let hasRandomSettings = false;
+let rerollBusy = false;
+let lastRandomConfig = null;
+let charmCleanQueue = [];
+let charmCleanActive = false;
 
 const IMGS = {};
 const BG_CACHE = {};
@@ -283,6 +291,15 @@ function loadRawImg(src) {
   });
 }
 
+function preloadSpriteSheets(sources) {
+  const sheets = new Set();
+  (sources || []).forEach(src => {
+    const sprite = parseSpriteRef(src);
+    if (sprite?.sheet) sheets.add(sprite.sheet);
+  });
+  sheets.forEach(sheet => loadRawImg(sheet));
+}
+
 function resolveAssetSrc(src) {
   const sprite = parseSpriteRef(src);
   if (!sprite) return Promise.resolve(src);
@@ -481,14 +498,45 @@ function enhanceThumbImage(imgEl, src) {
   });
 }
 
+function queueCharmCleanup(src, callback) {
+  if (!src || typeof callback !== 'function') return;
+  charmCleanQueue.push({ src, callback });
+  runCharmCleanQueue();
+}
+
+async function runCharmCleanQueue() {
+  if (charmCleanActive) return;
+  charmCleanActive = true;
+  try {
+    while (charmCleanQueue.length) {
+      const task = charmCleanQueue.shift();
+      await new Promise(resolve => {
+        if ('requestIdleCallback' in window) requestIdleCallback(() => resolve(), { timeout: 650 });
+        else setTimeout(resolve, 12);
+      });
+      const cleaned = await cleanImageSource(task.src);
+      try { task.callback(cleaned); } catch (_) {}
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+  } finally {
+    charmCleanActive = false;
+  }
+}
+
 // Use the automatic background remover only for individual Charm images.
 // Set-cover images stay untouched so the customer still sees the full set preview.
 function enhanceCharmThumbImage(imgEl, src) {
   if (!imgEl || !src) return;
   imgEl.dataset.src = src;
-  cleanImageSource(src).then(cleaned => {
-    if (!cleaned || !imgEl.isConnected || imgEl.dataset.src !== src) return;
-    imgEl.src = cleaned;
+  // Show the sprite crop immediately. Background cleanup is queued one-by-one
+  // so opening a set does not freeze while many charms process together.
+  resolveAssetSrc(src).then(resolved => {
+    if (!resolved || !imgEl.isConnected || imgEl.dataset.src !== src) return;
+    imgEl.src = resolved;
+    queueCharmCleanup(src, cleaned => {
+      if (!cleaned || !imgEl.isConnected || imgEl.dataset.src !== src) return;
+      imgEl.src = cleaned;
+    });
   });
 }
 
@@ -501,9 +549,13 @@ function migrateAssetPath(src) {
 function prepareCharmImage(charm) {
   const original = charm.originalSrc || charm.src;
   charm.originalSrc = original;
-  cleanImageSource(original).then(cleaned => {
-    charm.src = cleaned || original;
-    loadImg(charm.src).then(() => draw());
+  charm.src = original;
+  // Draw immediately, then upgrade to the background-cleaned image in the queue.
+  loadImg(original).then(() => draw());
+  queueCharmCleanup(original, cleaned => {
+    if (!cleaned) return;
+    charm.src = cleaned;
+    loadImg(cleaned).then(() => draw());
   });
 }
 
@@ -933,8 +985,120 @@ function randomBlankItems() {
   return CATALOG.filter(item => item.cat === 'ຊາມເປົ່າ');
 }
 
+function allRandomMainSets() {
+  const result = [];
+  CHARM_DATA.forEach(cat => {
+    if (cat.cat === 'ຊາມເປົ່າ') return;
+    cat.subs.forEach((sub, subIndex) => {
+      result.push({
+        cat: cat.cat,
+        subIndex,
+        id: sub.id || `${cat.cat}-${subIndex}`,
+        name: sub.subname || `ເຊັດ ${subIndex + 1}`,
+        price: Number(sub.price) || 0,
+        count: sub.imgs?.length || 0
+      });
+    });
+  });
+  return result;
+}
+
+function ensureRandomSetSelection() {
+  if (randomSetSelectionReady) return;
+  randomSelectedSetIds = new Set(allRandomMainSets().map(set => set.id));
+  randomSetSelectionReady = true;
+}
+
 function randomMainItems() {
-  return CATALOG.filter(item => item.cat !== 'ຊາມເປົ່າ' && Number(item.price) > 0);
+  ensureRandomSetSelection();
+  return CATALOG.filter(item => item.cat !== 'ຊາມເປົ່າ'
+    && Number(item.price) > 0
+    && randomSelectedSetIds.has(item.setId));
+}
+
+function setAllRandomSets(selected) {
+  ensureRandomSetSelection();
+  randomSelectedSetIds = selected
+    ? new Set(allRandomMainSets().map(set => set.id))
+    : new Set();
+  renderRandomSetOptions();
+  updateRandomEstimate();
+}
+
+function setRandomCategorySets(catName, selected) {
+  ensureRandomSetSelection();
+  allRandomMainSets().filter(set => set.cat === catName).forEach(set => {
+    if (selected) randomSelectedSetIds.add(set.id);
+    else randomSelectedSetIds.delete(set.id);
+  });
+  renderRandomSetOptions();
+  updateRandomEstimate();
+}
+
+function toggleRandomSet(setId, checked) {
+  ensureRandomSetSelection();
+  if (checked) randomSelectedSetIds.add(setId);
+  else randomSelectedSetIds.delete(setId);
+  renderRandomSetOptions();
+  updateRandomEstimate();
+}
+
+function renderRandomSetOptions() {
+  const container = document.getElementById('randomSetGroups');
+  if (!container) return;
+  ensureRandomSetSelection();
+  const previouslyOpen = new Set([...container.querySelectorAll('details[open]')].map(el => el.dataset.cat));
+  container.innerHTML = '';
+
+  const groups = CHARM_DATA.filter(cat => cat.cat !== 'ຊາມເປົ່າ');
+  groups.forEach((cat, catIndex) => {
+    const sets = cat.subs.map((sub, subIndex) => ({
+      id: sub.id || `${cat.cat}-${subIndex}`,
+      name: sub.subname || `ເຊັດ ${subIndex + 1}`,
+      price: Number(sub.price) || 0,
+      count: sub.imgs?.length || 0
+    }));
+    const selectedCount = sets.filter(set => randomSelectedSetIds.has(set.id)).length;
+    const details = document.createElement('details');
+    details.className = 'random-set-group';
+    details.dataset.cat = cat.cat;
+    details.open = previouslyOpen.has(cat.cat) || (!randomSetRendered && catIndex === 0);
+    details.innerHTML = `
+      <summary>
+        <span>${escapeHTML(cat.cat)}</span>
+        <small>${selectedCount}/${sets.length} ເຊັດ</small>
+      </summary>
+      <div class="random-set-group-tools">
+        <button type="button" data-action="all">ເລືອກທັງໝົດ</button>
+        <button type="button" data-action="none">ບໍ່ເອົາໝວດນີ້</button>
+      </div>
+      <div class="random-set-checks"></div>`;
+
+    details.querySelector('[data-action="all"]').addEventListener('click', event => {
+      event.preventDefault();
+      setRandomCategorySets(cat.cat, true);
+    });
+    details.querySelector('[data-action="none"]').addEventListener('click', event => {
+      event.preventDefault();
+      setRandomCategorySets(cat.cat, false);
+    });
+
+    const checks = details.querySelector('.random-set-checks');
+    sets.forEach(set => {
+      const label = document.createElement('label');
+      label.className = `random-set-check${randomSelectedSetIds.has(set.id) ? ' active' : ''}`;
+      label.innerHTML = `
+        <input type="checkbox" ${randomSelectedSetIds.has(set.id) ? 'checked' : ''}>
+        <span class="random-set-check-name">${escapeHTML(set.name)}</span>
+        <small>${set.count} ແບບ · ${set.price.toLocaleString()} ກີບ</small>`;
+      label.querySelector('input').addEventListener('change', event => toggleRandomSet(set.id, event.target.checked));
+      checks.appendChild(label);
+    });
+    container.appendChild(details);
+  });
+  randomSetRendered = true;
+  const selectedTotal = document.getElementById('randomSelectedSetCount');
+  if (selectedTotal) selectedTotal.textContent = `${randomSelectedSetIds.size} ເຊັດ`;
 }
 
 function setRandomBudget(value) {
@@ -1012,12 +1176,20 @@ function updateRandomEstimate() {
   const blankPrice = getSelectedBlankPrice();
   const main = randomMainItems();
   const minMain = main.length ? Math.min(...main.map(item => Number(item.price) || 0).filter(Boolean)) : 0;
-  const minRequired = blankQty * blankPrice + Math.max(0, target - blankQty) * minMain;
-  const valid = budget >= minRequired && target >= blankQty && main.length > 0;
+  const mainSlots = Math.max(0, target - blankQty);
+  const minRequired = blankQty * blankPrice + mainSlots * minMain;
+  const hasEnoughPool = mainSlots === 0 || main.length >= mainSlots;
+  const valid = budget >= minRequired && target >= blankQty && (mainSlots === 0 || main.length > 0) && hasEnoughPool;
   estimate.classList.toggle('error', !valid);
-  estimate.innerHTML = valid
-    ? `ລະບົບຈະຈັດປະມານ <strong>${target} ຊິ້ນ</strong> · ຊາມເປົ່າ <strong>${blankQty} ຊິ້ນ</strong> · ງົບສູງສຸດ <strong>${budget.toLocaleString()} ກີບ</strong><br><small>ລາຄາຈິງຈະບໍ່ເກີນງົບ ແລະອາດເຫຼືອງົບເລັກນ້ອຍ.</small>`
-    : `ງົບນີ້ອາດບໍ່ພໍສຳລັບ ${target} ຊິ້ນ. ງົບຂັ້ນຕ່ຳປະມານ <strong>${minRequired.toLocaleString()} ກີບ</strong>.`;
+  if (!randomSelectedSetIds.size && mainSlots > 0) {
+    estimate.innerHTML = 'ກະລຸນາເລືອກຢ່າງໜ້ອຍ <strong>1 ເຊັດ</strong> ສຳລັບການສຸ່ມ.';
+  } else if (!hasEnoughPool) {
+    estimate.innerHTML = `ເຊັດທີ່ເລືອກມີ Charm ບໍ່ພໍສຳລັບ <strong>${mainSlots} ຊິ້ນ</strong>. ລອງເລືອກເຊັດເພີ່ມ.`;
+  } else {
+    estimate.innerHTML = valid
+      ? `ລະບົບຈະຈັດປະມານ <strong>${target} ຊິ້ນ</strong> · ໃຊ້ <strong>${randomSelectedSetIds.size} ເຊັດ</strong> · ຊາມເປົ່າ <strong>${blankQty} ຊິ້ນ</strong> · ງົບສູງສຸດ <strong>${budget.toLocaleString()} ກີບ</strong><br><small>ລາຄາຈິງຈະບໍ່ເກີນງົບ ແລະອາດເຫຼືອງົບເລັກນ້ອຍ.</small>`
+      : `ງົບນີ້ອາດບໍ່ພໍສຳລັບ ${target} ຊິ້ນ. ງົບຂັ້ນຕ່ຳປະມານ <strong>${minRequired.toLocaleString()} ກີບ</strong>.`;
+  }
   if (submit) submit.disabled = !valid;
 }
 
@@ -1025,6 +1197,7 @@ function openRandomDesigner() {
   const overlay = document.getElementById('randomDesigner');
   if (!overlay) return;
   if (!randomBlankRendered) renderRandomBlankOptions();
+  renderRandomSetOptions();
   syncRandomBlankQty();
   updateRandomEstimate();
   overlay.hidden = false;
@@ -1141,17 +1314,46 @@ function mergeRandomSequence(mainItems, blankItems) {
   return result;
 }
 
-async function generateRandomDesign() {
+function captureRandomConfig() {
+  return {
+    budget: Math.max(0, Number(document.getElementById('randomBudget')?.value) || 0),
+    targetCount: getRandomTargetCount(),
+    blankQty: Math.max(0, Number(document.getElementById('randomBlankQty')?.value) || 0),
+    blankCode: randomBlankCode,
+    setIds: [...randomSelectedSetIds]
+  };
+}
+
+function applyRandomConfig(config) {
+  if (!config) return;
+  const budget = document.getElementById('randomBudget');
+  const wrist = document.getElementById('randomWrist');
+  const blankQty = document.getElementById('randomBlankQty');
+  if (budget) budget.value = String(config.budget ?? budget.value);
+  if (wrist) wrist.value = String(config.targetCount ?? wrist.value);
+  if (blankQty) blankQty.value = String(config.blankQty ?? blankQty.value);
+  randomBlankCode = config.blankCode || '__random__';
+  randomSelectedSetIds = new Set(config.setIds || []);
+  randomSetSelectionReady = true;
+}
+
+async function generateRandomDesign(options = {}) {
+  if (options.config) applyRandomConfig(options.config);
   const budget = Math.max(0, Number(document.getElementById('randomBudget')?.value) || 0);
   const targetCount = getRandomTargetCount();
   const blankQty = Math.max(0, Math.min(targetCount, Number(document.getElementById('randomBlankQty')?.value) || 0));
   const submit = document.getElementById('randomSubmit');
+  const reroll = document.getElementById('rerollRandomBtn');
 
-  if (charms.length && !window.confirm('ການສຸ່ມຈະແທນຊາມທີ່ຈັດຢູ່ຕອນນີ້. ຕ້ອງການສຸ່ມໃໝ່ບໍ?')) return;
+  if (charms.length && !options.skipConfirm && !window.confirm('ການສຸ່ມຈະແທນຊາມທີ່ຈັດຢູ່ຕອນນີ້. ຕ້ອງການສຸ່ມໃໝ່ບໍ?')) return;
 
   if (submit) {
     submit.disabled = true;
     submit.textContent = 'ກຳລັງສຸ່ມ...';
+  }
+  if (reroll) {
+    reroll.disabled = true;
+    if (options.fromReroll) reroll.textContent = '⏳ ກຳລັງສຸ່ມ';
   }
 
   try {
@@ -1167,6 +1369,7 @@ async function generateRandomDesign() {
     }
 
     const selectedItems = mergeRandomSequence(mainItems || [], blankItems);
+    preloadSpriteSheets(selectedItems.map(item => item.src));
     const total = selectedItems.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
     if (total > budget) {
       showToast('ລອງປັບງົບແລ້ວສຸ່ມໃໝ່');
@@ -1201,6 +1404,9 @@ async function generateRandomDesign() {
     });
     selId = charms.at(-1)?.id || null;
     commitChange();
+    hasRandomSettings = true;
+    lastRandomConfig = captureRandomConfig();
+    if (reroll) reroll.hidden = false;
     closeRandomDesigner();
     showToast(`ສຸ່ມ ${selectedItems.length} ຊິ້ນ · ${total.toLocaleString()} ກີບ ✓`);
   } finally {
@@ -1208,8 +1414,23 @@ async function generateRandomDesign() {
       submit.disabled = false;
       submit.textContent = '🎲 ສຸ່ມໃຫ້ເລີຍ';
     }
+    if (reroll) {
+      reroll.disabled = false;
+      reroll.textContent = '🔄 ສຸ່ມໃໝ່';
+    }
+    rerollBusy = false;
     updateRandomEstimate();
   }
+}
+
+function rerollRandomDesign() {
+  if (rerollBusy) return;
+  if (!hasRandomSettings) {
+    openRandomDesigner();
+    return;
+  }
+  rerollBusy = true;
+  generateRandomDesign({ skipConfirm: true, fromReroll: true, config: lastRandomConfig });
 }
 
 function clearDesign() {
@@ -1324,6 +1545,7 @@ function openCharmSet(index) {
   if (wrap) setGridScrollMemory[activeCat] = wrap.scrollTop || 0;
   restoreSetScrollOnNextGrid = false;
   activeSubIndex = index;
+  preloadSpriteSheets(cat.subs[index].imgs || []);
   searchTerm = '';
   const search = document.getElementById('charmSearch');
   if (search) search.value = '';
@@ -1757,6 +1979,8 @@ window.addEventListener('keydown', event => {
 function initApp() {
   updateSoundButton();
   buildHome();
+  const firstCat = CHARM_DATA[0];
+  if (firstCat) preloadSpriteSheets(firstCat.subs.map(sub => sub.cover || sub.imgs?.[0] || ''));
   renderPickerCats();
   renderPickerSets();
   renderCharmGrid();
